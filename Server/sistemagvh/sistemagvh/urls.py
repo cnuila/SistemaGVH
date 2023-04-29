@@ -17,9 +17,11 @@ from django.contrib import admin
 from django.urls import include, path
 from users_api import urls as users_urls
 from products_api import urls as products_urls
+from deliverylocations_api import urls as delivery_locations_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(users_urls)),
-    path('api/', include(products_urls))
+    path('api/', include(products_urls)),
+    path('api/', include(delivery_locations_urls)),
 ]

@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',    
     'auth_firebase',    
     'users_api',
-    'products_api'
+    'products_api',
+    'deliverylocations_api'
 ]
 
 MIDDLEWARE = [
