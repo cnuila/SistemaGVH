@@ -24,8 +24,8 @@ export default class ProductDelivery extends Component<Props, State>{
     state: State = {
         productDelivery: [],
         columnHeaders: [
-            { field: "deliveryLocationId", headerName: "Ubicacion de Entrega", headerAlign: "center", align:"center", width: 150, type: "number" },
-            { field: "productId", headerName: "Producto Entregado", headerAlign: "center", align:"center", width: 150, type: "number" },
+            { field: "deliveryLocationId__name", headerName: "Ubicacion de Entrega", headerAlign: "center", align:"center", width: 150, type: "string" },
+            { field: "productId__description", headerName: "Producto Entregado", headerAlign: "center", align:"center", width: 150, type: "string" },
             { field: "expirationDate", headerName: "Fecha de Expiracion", headerAlign: "center", align:"center", width: 150, type: "Date" },  
             { field: "quantityDelivered", headerName: "Cantidad Entregada", headerAlign: "center", align:"center", width: 150, type: "number" },  
             { field: "quantityReturned", headerName: "Cantidad Devuelta", headerAlign: "center", align:"center", width: 150, type: "number" },  

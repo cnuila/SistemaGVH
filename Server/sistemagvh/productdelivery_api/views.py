@@ -19,10 +19,26 @@ class ProductDeliveryListApiView(APIView):
     authentication_classes = [FirebaseAuthentication]
 
     # retrieve every productDelivery on the db
+    # def get(self, request, *args, **kwargs):
+    #     product_delivery = ProductDelivery.objects.order_by("expirationDate")
+    #     serializer = ProductDeliverySerializer(product_delivery, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
     def get(self, request, *args, **kwargs):
-        product_delivery = ProductDelivery.objects.order_by("expirationDate")
-        serializer = ProductDeliverySerializer(product_delivery, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        one_day_ago = timezone.now() - timedelta(days=1)
+        product_delivery = ProductDelivery.objects.filter(
+                expirationDate__gte=one_day_ago
+            ).order_by('expirationDate').select_related(
+                'deliveryLocationId', 'productId'
+            ).values(
+                'id',
+                'deliveryLocationId__name',
+                'productId__description',
+                'expirationDate',
+                'quantityDelivered',
+                'quantityReturned',
+                'soldPrice',
+            )
+        return Response(product_delivery, status=status.HTTP_200_OK)
 
     
     # add a productDelivery
