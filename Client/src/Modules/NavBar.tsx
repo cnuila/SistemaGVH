@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { AppBar, Avatar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material'
-import { Menu, Logout, People, Home, Inventory, Domain  } from '@mui/icons-material';
+import { Menu, Logout, People, Home, Inventory, Domain, LocalShipping  } from '@mui/icons-material';
 import { AuthContext } from '../Auth/AuthContext';
 import { signUserOut } from '../Auth/AuthOperations';
 import { Link } from 'react-router-dom';
@@ -94,6 +94,14 @@ export default class NavBar extends Component<Props, State> {
                                     <ListItemButton>
                                         <ListItemIcon sx={{ color: "white" }}><Domain /></ListItemIcon>
                                         <ListItemText primary={"Lugares de Entrega"} />
+                                    </ListItemButton>
+                                </ListItem>
+                            </Link>
+                            <Link to="/entregaproducto" style={{ textDecoration: 'none', color:"white" }}>
+                                <ListItem disablePadding>
+                                    <ListItemButton>
+                                        <ListItemIcon sx={{ color: "white" }}><LocalShipping     /></ListItemIcon>
+                                        <ListItemText primary={"Entregas de Productos"} />
                                     </ListItemButton>
                                 </ListItem>
                             </Link>

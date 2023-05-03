@@ -13,6 +13,8 @@ import EditProduct from './Modules/Products/EditProduct';
 import DeliveryLocations from './Modules/DeliveryLocations/DeliveryLocations';
 import AddDeliveryLocation from './Modules/DeliveryLocations/AddDeliveryLocation';
 import EditDeliveryLocation from './Modules/DeliveryLocations/EditDeliveryLocation';
+import ProductDelivery from './Modules/ProductDelivery/ProductDelivery';
+
 
 function App() {
   return (
@@ -29,6 +31,7 @@ function App() {
         <Route path='lugaresentrega' element={<ProtectedRoute><DeliveryLocations /></ProtectedRoute>} />
         <Route path='lugaresentrega/crear' element={<ProtectedRoute><AddDeliveryLocation /></ProtectedRoute>} />
         <Route path='lugaresentrega/:deliveryLocationId' element={<ProtectedRoute><EditDeliveryLocation /></ProtectedRoute>} />
+        <Route path='entregaproducto' element={<ProtectedRoute><ProductDelivery /></ProtectedRoute>} />
         <Route path="*" element={<p>No encontramos lo que buscas:(</p>} />
       </Routes>
     </AuthProvider>

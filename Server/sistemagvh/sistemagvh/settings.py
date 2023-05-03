@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'auth_firebase',    
     'users_api',
     'products_api',
-    'deliverylocations_api'
+    'deliverylocations_api',
+    'productdelivery_api'
 ]
 
 MIDDLEWARE = [
@@ -80,20 +81,33 @@ WSGI_APPLICATION = 'sistemagvh.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+#DATABASES = {
+#    "default": {
+#        "ENGINE": "mssql",
+#        "NAME": "GVHDb",
+#        "USER": "sa",
+#        "PASSWORD": "Password#123",
+#        "HOST": "localhost",
+#        "PORT": "1433",
+#        "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
+#                    "extra_params": "Encrypt=no;TrustServerCertificate=yes"
+#        },
+#    },
+#}
+
 DATABASES = {
     "default": {
         "ENGINE": "mssql",
         "NAME": "GVHDb",
-        "USER": "sa",
-        "PASSWORD": "Password#123",
-        "HOST": "localhost",
-        "PORT": "1433",
+        "USER": "josue",
+        "PASSWORD": "33441221",
+        "HOST": "msi-josue\\sqlexpress",
+        "PORT": "",
         "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
                     "extra_params": "Encrypt=no;TrustServerCertificate=yes"
         },
     },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
