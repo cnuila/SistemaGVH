@@ -10,8 +10,8 @@ from datetime import timedelta
 from .models import ProductDelivery
 from .serializers import ProductDeliverySerializer
 #APIs included in this view
-# from deliverylocations_api.models import DeliveryLocations
-# from products_api.models import Product
+from deliverylocations_api.models import DeliveryLocations
+from products_api.models import Product
 
 # methods under /productDelivery
 class ProductDeliveryListApiView(APIView):
@@ -25,9 +25,7 @@ class ProductDeliveryListApiView(APIView):
     #     return Response(serializer.data, status=status.HTTP_200_OK)
     def get(self, request, *args, **kwargs):
         one_day_ago = timezone.now() - timedelta(days=1)
-        product_delivery = ProductDelivery.objects.filter(
-                expirationDate__gte=one_day_ago
-            ).order_by('expirationDate').select_related(
+        product_delivery = ProductDelivery.objects.order_by('expirationDate').select_related(
                 'deliveryLocationId', 'productId'
             ).values(
                 'id',
@@ -42,10 +40,26 @@ class ProductDeliveryListApiView(APIView):
 
     
     # add a productDelivery
+    # add a productDelivery
     def post(self, request, *args, **kwargs):
+        delivery_location_name = request.data.get('deliveryLocationId__name')
+        product_description = request.data.get('productId__description')
+
+        try:
+            delivery_location = DeliveryLocations.objects.get(name=delivery_location_name)
+        except DeliveryLocations.DoesNotExist:
+            return Response({"res": f"No se encontró la locación de entrega con el nombre: {delivery_location_name}"}, 
+                status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(description=product_description)
+        except Product.DoesNotExist:
+            return Response({"res": f"No se encontró el producto con la descripción: {product_description}"}, 
+                status=status.HTTP_400_BAD_REQUEST)
+
         data = {
-            'deliveryLocationId': request.data.get('deliveryLocationId'),
-            'productId': request.data.get('productId'),
+            'deliveryLocationId': delivery_location.id,
+            'productId': product.id,
             'expirationDate': request.data.get('expirationDate'),
             'quantityDelivered': request.data.get('quantityDelivered'),
             'quantityReturned': request.data.get('quantityReturned'),
@@ -56,6 +70,7 @@ class ProductDeliveryListApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # methods under productDelivery/<str:productDelivery_id>
 class ProductDeliveryDetailApiView(APIView):
@@ -77,8 +92,21 @@ class ProductDeliveryDetailApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        serializer = ProductDeliverySerializer(prod_deliv_location)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        product_delivery = ProductDelivery.objects.values(
+            'id',
+            'deliveryLocationId__name',
+            'productId__description',
+            'expirationDate',
+            'quantityDelivered',
+            'quantityReturned',
+            'soldPrice',
+        ).first()
+        if not product_delivery:
+            return Response(
+                {"res": "No se encontró el Product Delivery con ese Id."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(product_delivery, status=status.HTTP_200_OK)
 
     # update the delivery location by id
     def put(self, request, prod_deliv_id, *args, **kwargs):
@@ -89,9 +117,24 @@ class ProductDeliveryDetailApiView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        delivery_location_name = request.data.get('deliveryLocationId__name')
+        product_description = request.data.get('productId__description')
+
+        try:
+            delivery_location = DeliveryLocations.objects.get(name=delivery_location_name)
+        except DeliveryLocations.DoesNotExist:
+            return Response({"res": f"No se encontró la locación de entrega con el nombre: {delivery_location_name}"}, 
+                status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            product = Product.objects.get(description=product_description)
+        except Product.DoesNotExist:
+            return Response({"res": f"No se encontró el producto con la descripción: {product_description}"}, 
+                status=status.HTTP_400_BAD_REQUEST)
+
         data = {
-            'deliveryLocationId': request.data.get('deliveryLocationId'),
-            'productId': request.data.get('productId'),
+            'deliveryLocationId': delivery_location.id,
+            'productId': product.id,
             'expirationDate': request.data.get('expirationDate'),
             'quantityDelivered': request.data.get('quantityDelivered'),
             'quantityReturned': request.data.get('quantityReturned'),
@@ -118,23 +161,4 @@ class ProductDeliveryDetailApiView(APIView):
             status=status.HTTP_200_OK
         )
     
-class ProductDeliveryClientApiView(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [FirebaseAuthentication]
 
-    # retrieve every productDelivery on the db
-    def get(self, request, *args, **kwargs):
-        one_day_ago = timezone.now() - timedelta(days=1)
-        product_delivery = ProductDelivery.objects.filter(
-                expirationDate__gte=one_day_ago
-            ).order_by('expirationDate').select_related(
-                'deliveryLocationId', 'productId'
-            ).values(
-                'deliveryLocationId__name',
-                'productId__description',
-                'expirationDate',
-                'quantityDelivered',
-                'quantityReturned',
-                'soldPrice',
-            )
-        return Response(product_delivery, status=status.HTTP_200_OK)
