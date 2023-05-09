@@ -29,7 +29,7 @@ export default class EditProductDelivery extends Component<Props, State> {
         productId__description: "",
         expirationDate: "",
         quantityDelivered: "0",
-        quantityReturned: "0",
+        quantityReturned: "",
         soldPrice: "0",
         message: {
             show: false,
@@ -42,14 +42,20 @@ export default class EditProductDelivery extends Component<Props, State> {
     async componentDidMount() {
         const { productDeliveryId } = this.state
         const productDelivery = (await ProductDeliveryService.getById(productDeliveryId)).data
+        if(productDelivery.quantityReturned === null){
+            this.setState({quantityReturned: ""})
+        }else{
+            this.setState({quantityReturned: productDelivery.quantityReturned.toString()})
+        }
         this.setState({
             deliveryLocationId__name: productDelivery.deliveryLocationId__name,
             productId__description: productDelivery.productId__description,
             expirationDate: productDelivery.expirationDate.toString(),
             quantityDelivered: productDelivery.quantityDelivered.toString(),
-            quantityReturned: productDelivery.quantityReturned.toString(),
             soldPrice: productDelivery.soldPrice.toString()
         })
+        
+        //console.log(productDelivery)
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,13 +102,21 @@ export default class EditProductDelivery extends Component<Props, State> {
         if (this.validations()) {
             try {
                 const { productDeliveryId, deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
+                //console.log(quantityReturned)
+                let qReturnedValue: number | null 
+                if(quantityReturned === ""){    
+                    qReturnedValue = null
+                }else{
+                    qReturnedValue = +quantityReturned
+                }
+                
                 const productDeliveryToEdit: IProductDeliveryData = {
                     id: productDeliveryId,
                     deliveryLocationId__name,
                     productId__description,
                     expirationDate,
                     quantityDelivered: +quantityDelivered,
-                    quantityReturned: +quantityReturned,
+                    quantityReturned: qReturnedValue,
                     soldPrice: +soldPrice,
                 }
                 //console.log(productDeliveryToAdd)
@@ -120,7 +134,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     }
 
     validations = () => {
-        const { deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
+        const { deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, soldPrice } = this.state
         if (deliveryLocationId__name === "") {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false

@@ -1,10 +1,10 @@
-export default interface IProductData {
+export default interface IProductDeliveryData {
     id: number | null,
-    deliveryLocationId__name: string, 
-    productId__description: string,
+    deliveryLocationId: number | null, 
+    productId: number | null,
     expirationDate: string, 
     quantityDelivered: number,
-    quantityReturned: number,
+    quantityReturned: number | null,
     soldPrice: number,
 }
 

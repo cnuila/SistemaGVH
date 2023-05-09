@@ -22,6 +22,10 @@ class DeliveryLocationService {
     updateDeliveryLocation(id: number, deliveryLocation: IDeliveryLocationData){
         return http.put<any>(`/deliverylocations/${id}`, deliveryLocation)
     }
+
+    getDeliveryLocationNames(){
+        return http.get<Array<string>>("/deliveryLocationsnames")
+    }
 }
 
 export default new DeliveryLocationService();

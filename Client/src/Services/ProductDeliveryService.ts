@@ -1,5 +1,6 @@
 import http from "../Utilities/AxiosObject"
 import IProductDeliveryData from "../Utilities/Interfaces/IProductDeliveryData"
+import IProductDeliveryViewData from "../Utilities/Interfaces/IProductDeliveryViewData"
 
 class ProductDeliveryService {
 
@@ -8,7 +9,11 @@ class ProductDeliveryService {
     }
 
     getAll(){
-        return http.get<Array<IProductDeliveryData>>("/productdelivery")
+        return http.get<Array<IProductDeliveryViewData>>("/productdelivery")
+    }
+
+    getAllWithReturns(){
+        return http.get<Array<IProductDeliveryViewData>>("/productdelivery/returns")
     }
 
     addProductDelivery(productDelivery: IProductDeliveryData){
@@ -22,6 +27,7 @@ class ProductDeliveryService {
     updateProductDelivery(id: number, productDelivery: IProductDeliveryData){
         return http.put<any>(`/productdelivery/${id}`, productDelivery)
     }
+
 }
 
 export default new ProductDeliveryService();

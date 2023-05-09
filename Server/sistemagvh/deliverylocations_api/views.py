@@ -87,3 +87,35 @@ class DeliveryLocationsDetailApiView(APIView):
             {"res": "Lugar de Entrega eliminado."},
             status=status.HTTP_200_OK
         )
+    
+class DeliveryLocationsSearchApiView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseAuthentication]
+
+    def get_delivery_location(self, d_location_name):
+        try:
+            return DeliveryLocations.objects.get(name=d_location_name)
+        except DeliveryLocations.DoesNotExist:
+            return None
+
+    # get the delivery locaiton by id
+    def get(self, request, d_location_name, *args, **kwargs):
+        current_d_location = self.get_delivery_location(d_location_name)
+        if not current_d_location:
+            return Response(
+                {"res": "No se encontró el Lugar de Entrega con ese Id."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        serializer = DeliveryLocationsSerializer(current_d_location)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class DeliveryLocationsNameListApiView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [FirebaseAuthentication]
+
+    # retrieve every delivery location on the db and return only the name
+    def get(self, request, *args, **kwargs):
+        delivery_locations = DeliveryLocations.objects.order_by("name").values("name")
+        #serializer = DeliveryLocationsSerializer(delivery_locations, many=True)
+        return Response(list(delivery_locations), status=status.HTTP_200_OK)

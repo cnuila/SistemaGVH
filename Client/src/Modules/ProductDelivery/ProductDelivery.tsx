@@ -1,28 +1,32 @@
 import React, { Component } from 'react'
-import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/material'
+import { Alert, Box, Button, Container, Snackbar, Typography, Radio , RadioGroup, FormControlLabel} from '@mui/material'
 import { Navigate } from 'react-router-dom'
 import { DataGrid, GridActionsCellItem, GridColDef, GridRowId } from '@mui/x-data-grid'
 import { Edit, Delete } from '@mui/icons-material'
 import NavBar from '../NavBar'
-import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
+import IProductDeliveryViewData from '../../Utilities/Interfaces/IProductDeliveryViewData'
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import { getError } from '../../Utilities/ErrorHandler'
 
+
 type Props = {}
 
 type State = {
-    productDelivery: Array<IProductDeliveryData>,
-    columnHeaders: Array<GridColDef<IProductDeliveryData>>,
+    productDelivery: Array<IProductDeliveryViewData>,
+    selectedRadio: string,
+    columnHeaders: Array<GridColDef<IProductDeliveryViewData>>,
     goToAnotherPage: boolean,
     goToAddress: string,
     message: IMessage
 }
 
 
+
 export default class ProductDelivery extends Component<Props, State>{
     state: State = {
         productDelivery: [],
+        selectedRadio: "todas",
         columnHeaders: [
             { field: "deliveryLocationId__name", headerName: "Ubicacion de Entrega", headerAlign: "center", align:"center", width: 150, type: "string" },
             { field: "productId__description", headerName: "Producto Entregado", headerAlign: "center", align:"center", width: 150, type: "string" },
@@ -115,6 +119,30 @@ export default class ProductDelivery extends Component<Props, State>{
             }
         });
     };
+    
+
+    async fetchProductDeliveryData(filterValue: string) {
+        if (filterValue === "todas") {
+            const productDelivery = (await ProductDeliveryService.getAll()).data;
+            this.setState({
+                productDelivery,
+            })
+        } else if (filterValue === "devoluciones") {
+            const productDelivery = (await ProductDeliveryService.getAllWithReturns()).data;
+            this.setState({
+                productDelivery,
+            })
+        }
+    }
+
+    handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const filterValue = e.target.value;
+        //console.log(filterValue)
+        this.setState({
+            selectedRadio: filterValue
+        });
+        this.fetchProductDeliveryData(filterValue);
+    };
 
     render() {
         const { productDelivery, columnHeaders, message, goToAnotherPage, goToAddress } = this.state 
@@ -140,8 +168,19 @@ export default class ProductDelivery extends Component<Props, State>{
                             </Typography>
 
                         </Box>
-                        <Box>
+                        <Box  sx={{ display: "flex", gap: "1rem", justifyContent: 'space-between'}}>
                             <Button variant='contained' sx={{ bgcolor: "#002366", mb: 2 }} onClick={() => this.addProductDeliveryClicked()}>Agregar Entrega de Producto</Button>
+                            <RadioGroup row
+                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                name="controlled-radio-buttons-group"
+                                value={this.state.selectedRadio}
+                                sx={{transform: "translateY(-2px)"}}
+                                onChange={this.handleChange}
+                                //onChange={(e) => this.setState({ selectedRadio: e.target.value })}
+                            >
+                                <FormControlLabel  value="todas" control={<Radio />} label="Todas las Entregas" />
+                                <FormControlLabel value="devoluciones" control={<Radio />} label="Entregas con Devoluciones" />
+                            </RadioGroup>
                         </Box>
                         <Box sx={{ height: 500, width: "100%", }}>
                             <DataGrid

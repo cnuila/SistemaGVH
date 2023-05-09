@@ -41,6 +41,8 @@ export default class EditProduct extends Component<Props, State> {
     async componentDidMount() {
         const { productId } = this.state
         const product = (await ProductService.getById(productId)).data
+        console.log(product)
+        console.log(product.code + " " + product.description + " " + product.cost + " " + product.sellingPrice + " " + product.quantity)
         this.setState({
             code: product.code,
             description: product.description,

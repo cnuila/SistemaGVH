@@ -1,58 +1,79 @@
-import { Alert, Box, Button, Container, Snackbar, TextField, Typography} from '@mui/material'
-// import { LocalizationProvider } from '@mui/x-date-pickers';
-// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
+
+import Autocomplete from '@mui/material/Autocomplete';
 
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
+import IProductData from '../../Utilities/Interfaces/IProductData'
+import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData';
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
+import DeliveryLocationService from '../../Services/DeliveryLocationService'
+import ProductService from '../../Services/ProductService';
 
-type Props = { } 
+
+type Props = {}
 
 type State = {
-    deliveryLocationId__name: string,
-    productId__description: string,
+    deliveryLocationChoosed: IDeliveryLocationData | null,
+    productChoosed: IProductData | null,
     expirationDate: string,
     quantityDelivered: string,
-    quantityReturned: string,
     soldPrice: string,
     message: IMessage,
     productDeliveryCreated: boolean
+    openProducts: boolean,
+    openDeliveryLocations: boolean,
+    products: IProductData[],
+    deliveryLocations: IDeliveryLocationData[]
 }
+
+
 
 
 export default class AddProductDelivery extends Component<Props, State>{
     state: State = {
-        deliveryLocationId__name: "",
-        productId__description: "",
+        deliveryLocationChoosed: null,
+        productChoosed: null,
         expirationDate: "",
         quantityDelivered: "0",
-        quantityReturned: "0",
         soldPrice: "0",
         message: {
             show: false,
             text: "",
             type: "success"
         },
-        productDeliveryCreated: false
+        productDeliveryCreated: false,
+        openProducts: false,
+        openDeliveryLocations: false,
+        products: [],
+        deliveryLocations: []
+    }
+
+    // componentDidMount() {
+    //     DeliveryLocationService.getDeliveryLocationNames().then((response) => {
+    //       this.setState({ deliveryLocationsListAutoComplete: response.data });
+    //     });
+    // }
+    async componentDidMount() {
+        const products = (await ProductService.getAll()).data
+        console.log(products)
+        const deliveryLocations = (await DeliveryLocationService.getAll()).data
+        console.log(deliveryLocations)
+        this.setState({ deliveryLocations })
+        this.setState({ products })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
 
         const wholeNumberRegex = /^\d*$/
-        const dateRegex = /^(([1-9])|(0[1-9])|(1[0-2]))\/(([1-9])|(0[1-9])|([12][0-9])|(3[01]))\/((19|20)\d{2})$/
+        // const dateRegex = /^(([1-9])|(0[1-9])|(1[0-2]))\/(([1-9])|(0[1-9])|([12][0-9])|(3[01]))\/((19|20)\d{2})$/
         const decimalRegex = /^\d*\.?\d*$/
+        console.log(name + " " + value)
 
-        if (name === "deliveryLocationId__name") {
-            this.setState({ deliveryLocationId__name: value })
-        }
-        if (name === "productId__description") {
-            this.setState({ productId__description: value })
-        }            
         if (name === "expirationDate") {
             this.setState({ expirationDate: value })
             // if (dateRegex.test(value)) {
@@ -62,19 +83,29 @@ export default class AddProductDelivery extends Component<Props, State>{
             // }
         }
         if (name === "quantityDelivered") {
-            if (wholeNumberRegex.test(value)){
+            if (wholeNumberRegex.test(value)) {
                 this.setState({ quantityDelivered: value })
-            }
-        } 
-        if (name === "quantityReturned") {
-            if (wholeNumberRegex.test(value)){
-                this.setState({ quantityReturned: value })
             }
         }
         if (name === "soldPrice") {
-            if (decimalRegex.test(value)){
+            if (decimalRegex.test(value)) {
                 this.setState({ soldPrice: value })
-            }                 
+            }
+        }
+    }
+
+    handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
+        if (value !== null) {
+            this.setState({ deliveryLocationChoosed: value });
+        } else {
+            this.setState({ deliveryLocationChoosed: null });
+        }
+    }
+    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductData | null) => {
+        if (value !== null) {
+            this.setState({ productChoosed: value });
+        } else {
+            this.setState({ productChoosed: null });
         }
     }
 
@@ -82,17 +113,19 @@ export default class AddProductDelivery extends Component<Props, State>{
         e.preventDefault();
 
         if (this.validations()) {
+            console.log("validations passed")
             try {
-                const { deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
+                const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
                 const productDeliveryToAdd: IProductDeliveryData = {
                     id: null,
-                    deliveryLocationId__name,
-                    productId__description,
+                    deliveryLocationId: deliveryLocationChoosed!.id,
+                    productId: productChoosed!.id,
                     expirationDate,
                     quantityDelivered: +quantityDelivered,
-                    quantityReturned: +quantityReturned,
+                    quantityReturned: null,
                     soldPrice: +soldPrice,
                 }
+                console.log("3")
                 //console.log(productDeliveryToAdd)
                 const response = await ProductDeliveryService.addProductDelivery(productDeliveryToAdd)
                 if (response.status === 201) {
@@ -108,13 +141,17 @@ export default class AddProductDelivery extends Component<Props, State>{
     }
 
     validations = () => {
-        const { deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
-        if (deliveryLocationId__name === "") {
+        const {  deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryLocations } = this.state
+        console.log(deliveryLocationChoosed)
+        console.log(productChoosed)
+        // const selectedLocation = deliveryLocations.find(location => location.name === newValue.name);
+        // const selectedLocationId = selectedLocation.id;
+        if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
         }
-        if (productId__description === "") {
-            this.prepareMessage("Debes ingresar una descripcion de producto", true);
+        if (productChoosed === null) {
+            this.prepareMessage("Debes ingresar un Nombre de producto", true);
             return false
         }
         if (expirationDate === "") {
@@ -155,7 +192,7 @@ export default class AddProductDelivery extends Component<Props, State>{
         });
     };
     render() {
-        const { deliveryLocationId__name, productId__description, expirationDate, quantityDelivered, quantityReturned, soldPrice, message, productDeliveryCreated } = this.state
+        const { deliveryLocationChoosed,productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
 
         if (productDeliveryCreated) {
             return (<Navigate to={"/entregaproducto"} replace />)
@@ -179,19 +216,103 @@ export default class AddProductDelivery extends Component<Props, State>{
                         </Box>
                         <Box component="form" sx={{ display: "flex", flexDirection: "column" }} noValidate onSubmit={this.handleOnSubmit}>
 
-                            <TextField id="deliveryLocationId__name" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Nombre Ubicacion" name="deliveryLocationId__name" value={deliveryLocationId__name} onChange={this.handleOnChange}/>
-                            <TextField id="productId__description" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Nombre Producto" name="productId__description" value={productId__description} onChange={this.handleOnChange} />
+                            {/* <TextField id="deliveryLocationId__name" variant="outlined" margin="normal" required fullWidth type="text"
+                                label="Nombre Ubicacion" name="deliveryLocationId__name" value={deliveryLocationId__name} onChange={this.handleOnChange}/> */}
+
+
+                            <Autocomplete
+                                id="deliveryLocation"
+                                sx={{ marginTop: 2 }}
+                                open={openDeliveryLocations}
+                                onOpen={() => {
+                                    this.setState({ openDeliveryLocations: true })
+                                }}
+                                onClose={() => {
+                                    this.setState({ openDeliveryLocations: false })
+                                }}
+
+                                isOptionEqualToValue={(option: IDeliveryLocationData, value: IDeliveryLocationData) => option.name === value.name}
+                                getOptionLabel={(option: IDeliveryLocationData) => option.name}
+                                options={deliveryLocations}
+                                onChange={this.handleDeliveryLocationChange}
+                                value={deliveryLocationChoosed}
+                                // loading={loading}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Ubicacion de Entrega"
+                                        
+
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                            <Autocomplete
+                                id="asynchronous-demo"
+                                sx={{ marginTop: 2 }}
+                                open={openProducts}
+                                onOpen={() => {
+                                    this.setState({ openProducts: true })
+                                }}
+                                onClose={() => {
+                                    this.setState({ openProducts: false })
+                                }}
+                                isOptionEqualToValue={(option: IProductData, value: IProductData) => option.description === value.description}
+                                getOptionLabel={(option: IProductData) => option.description}
+                                options={products}
+                                onChange={this.handleProductChange}
+                                value={productChoosed}
+                                // loading={loading}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Nombre del Producto"
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                            {/* <TextField id="productId__description" variant="outlined" margin="normal" required fullWidth type="text"
+                                label="Nombre Producto" name="productId__description" value={productId__description} onChange={this.handleOnChange} /> */}
                             <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
                                 label="Fecha Expiracion" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
+
+                            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DemoContainer components={['DatePicker', 'DatePicker']}>
+                                    <DatePicker label="Uncontrolled picker" defaultValue={dayjs('2022-04-17')} />
+                                    <DatePicker
+                                        label="Controlled picker"
+                                        value={value}
+                                        onChange={(newValue) => setValue(newValue)}
+                                    />
+                                </DemoContainer>
+                            </LocalizationProvider> */}
+
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
-                            <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
-                                label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} />
+                            {/* <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
+                                label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} /> */}
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
-                            
+
+
+
+
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
                         </Box>
