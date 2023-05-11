@@ -5,9 +5,9 @@ import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
@@ -137,7 +137,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     }
 
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
         console.log(deliveryLocationChoosed)
         console.log(productChoosed)
         // const selectedLocation = deliveryLocations.find(location => location.name === newValue.name);
@@ -196,9 +196,9 @@ export default class AddProductDelivery extends Component<Props, State>{
             return (<Navigate to={"/entregaproducto"} replace />)
         }
 
-        function setValue(newValue: string | null): void {
-            throw new Error('Function not implemented.');
-        }
+        // function setValue(newValue: string | null): void {
+        //     throw new Error('Function not implemented.');
+        // }
 
         return (
             <React.Fragment>

@@ -32,7 +32,7 @@ type State = {
     productDeliveryEdited: boolean,
 }
 
-export default class extends Component<Props, State> {
+export default class EditProductDelivery extends Component<Props, State> {
     state: State = {
         productDeliveryId: +document.location.pathname.split("/")[2],
         deliveryLocationChoosed: null,
@@ -167,7 +167,7 @@ export default class extends Component<Props, State> {
     }
 
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
         // console.log(deliveryLocationChoosed)
         // console.log(productChoosed)
         if (deliveryLocationChoosed === null) {
