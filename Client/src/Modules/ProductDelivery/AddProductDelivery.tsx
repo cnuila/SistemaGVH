@@ -1,10 +1,14 @@
 import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
 
 import Autocomplete from '@mui/material/Autocomplete';
-
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
+
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
 import IProductData from '../../Utilities/Interfaces/IProductData'
@@ -12,7 +16,6 @@ import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationD
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import ProductService from '../../Services/ProductService';
-
 
 type Props = {}
 
@@ -59,28 +62,21 @@ export default class AddProductDelivery extends Component<Props, State>{
     // }
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
-        console.log(products)
+        // console.log(products)
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        console.log(deliveryLocations)
+        // console.log(deliveryLocations)
         this.setState({ deliveryLocations })
         this.setState({ products })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-
         const wholeNumberRegex = /^\d*$/
-        // const dateRegex = /^(([1-9])|(0[1-9])|(1[0-2]))\/(([1-9])|(0[1-9])|([12][0-9])|(3[01]))\/((19|20)\d{2})$/
         const decimalRegex = /^\d*\.?\d*$/
         console.log(name + " " + value)
 
         if (name === "expirationDate") {
             this.setState({ expirationDate: value })
-            // if (dateRegex.test(value)) {
-            //   const [day, month, year] = value.split("-").reverse();
-            //   const formattedDate = `${month}/${day}/${year}`;
-            //   this.setState({ expirationDate: formattedDate });
-            // }
         }
         if (name === "quantityDelivered") {
             if (wholeNumberRegex.test(value)) {
@@ -141,7 +137,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     }
 
     validations = () => {
-        const {  deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryLocations } = this.state
         console.log(deliveryLocationChoosed)
         console.log(productChoosed)
         // const selectedLocation = deliveryLocations.find(location => location.name === newValue.name);
@@ -191,11 +187,17 @@ export default class AddProductDelivery extends Component<Props, State>{
             }
         });
     };
+    
+    
     render() {
-        const { deliveryLocationChoosed,productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
 
         if (productDeliveryCreated) {
             return (<Navigate to={"/entregaproducto"} replace />)
+        }
+
+        function setValue(newValue: string | null): void {
+            throw new Error('Function not implemented.');
         }
 
         return (
@@ -241,7 +243,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                     <TextField
                                         {...params}
                                         label="Ubicacion de Entrega"
-                                        
+                                        required
 
                                         InputProps={{
                                             ...params.InputProps,
@@ -256,7 +258,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 )}
                             />
                             <Autocomplete
-                                id="asynchronous-demo"
+                                id="product"
                                 sx={{ marginTop: 2 }}
                                 open={openProducts}
                                 onOpen={() => {
@@ -275,6 +277,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                     <TextField
                                         {...params}
                                         label="Nombre del Producto"
+                                        required
                                         InputProps={{
                                             ...params.InputProps,
                                             endAdornment: (
@@ -287,22 +290,21 @@ export default class AddProductDelivery extends Component<Props, State>{
                                     />
                                 )}
                             />
-                            {/* <TextField id="productId__description" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Nombre Producto" name="productId__description" value={productId__description} onChange={this.handleOnChange} /> */}
+
                             <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Fecha Expiracion" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
+                                label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
 
+                            {/* <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="date"
+                                label="Fecha de Expiracion" name="expirationDate"  value={expirationDate} 
+                                //onChange={this.handleOnChange}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            /> */}
                             {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DemoContainer components={['DatePicker', 'DatePicker']}>
-                                    <DatePicker label="Uncontrolled picker" defaultValue={dayjs('2022-04-17')} />
-                                    <DatePicker
-                                        label="Controlled picker"
-                                        value={value}
-                                        onChange={(newValue) => setValue(newValue)}
-                                    />
-                                </DemoContainer>
+                                <DatePicker label="Basic date picker" />
                             </LocalizationProvider> */}
-
+                            
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
                             {/* <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
@@ -322,4 +324,3 @@ export default class AddProductDelivery extends Component<Props, State>{
         )
     }
 }
-

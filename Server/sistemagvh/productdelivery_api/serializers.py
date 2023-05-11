@@ -8,16 +8,8 @@ from .models import ProductDelivery
 
 class ProductDeliverySerializer(serializers.ModelSerializer):
     id = serializers.ReadOnlyField()
-    # productDescription = serializers.CharField(source='productId.description')
-    # deliveryLocationName = serializers.CharField(source='deliveryLocationId.name')
+
     class Meta:
         model = ProductDelivery
         fields = ["id", "deliveryLocationId", "productId", "expirationDate", "quantityDelivered", "quantityReturned", "soldPrice"]
  
-# class ProductDeliveryClientSerializer(serializers.ModelSerializer):
-#     id = serializers.ReadOnlyField()
-#     # productDescription = serializers.CharField(source='productId.description')
-#     # deliveryLocationName = serializers.CharField(source='deliveryLocationId.name')
-#     class Meta:
-#         model = ProductDeliveryClient
-#         fields = ["id", "deliveryLocationName", "productDescription", "expirationDate", "quantityDelivered", "quantityReturned", "soldPrice"]
