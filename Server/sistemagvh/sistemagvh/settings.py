@@ -81,19 +81,19 @@ WSGI_APPLICATION = 'sistemagvh.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-#DATABASES = {
-#    "default": {
-#        "ENGINE": "mssql",
-#        "NAME": "GVHDb",
-#        "USER": "sa",
-#        "PASSWORD": "Password#123",
-#        "HOST": "localhost",
-#        "PORT": "1433",
-#        "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
-#                    "extra_params": "Encrypt=no;TrustServerCertificate=yes"
-#        },
-#    },
-#}
+DATABASES = {
+    "default": {
+        "ENGINE": "mssql",
+        "NAME": "GVHDb",
+        "USER": "sa",
+        "PASSWORD": "Password#123",
+        "HOST": "localhost",
+        "PORT": "1433",
+        "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
+                    "extra_params": "Encrypt=no;TrustServerCertificate=yes"
+        },
+    },
+}
 
 #DATABASES = {
 #    "default": {
@@ -109,18 +109,18 @@ WSGI_APPLICATION = 'sistemagvh.wsgi.application'
 #    },
 #}
 
-DATABASES = {
-    'default':{
-        'ENGINE':'mssql',
-        'NAME':'GVHDb',
-        'USER':'',                     # Keep it blank
-        'PASSWORD':'',                 # Keep it blank
-        'HOST':'(localdb)\LocalVincu', # "localhost" is also possible
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-        },
-    }
-}
+#DATABASES = {
+#    'default':{
+#        'ENGINE':'mssql',
+#        'NAME':'GVHDb',
+#        'USER':'',                     # Keep it blank
+#        'PASSWORD':'',                 # Keep it blank
+#        'HOST':'(localdb)\LocalVincu', # "localhost" is also possible
+#        'OPTIONS': {
+#            'driver': 'ODBC Driver 17 for SQL Server',
+#        },
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators

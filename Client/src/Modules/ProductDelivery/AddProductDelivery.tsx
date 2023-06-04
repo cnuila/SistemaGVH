@@ -1,5 +1,7 @@
 import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
-
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
@@ -187,8 +189,8 @@ export default class AddProductDelivery extends Component<Props, State>{
             }
         });
     };
-    
-    
+
+
     render() {
         const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
 
@@ -291,6 +293,11 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 )}
                             />
 
+                            <br></br>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                <DatePicker />
+                            </LocalizationProvider>
+
                             <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
                                 label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
 
@@ -304,16 +311,13 @@ export default class AddProductDelivery extends Component<Props, State>{
                             {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DatePicker label="Basic date picker" />
                             </LocalizationProvider> */}
-                            
+
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
                             {/* <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} /> */}
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
-
-
-
 
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>

@@ -1,53 +1,73 @@
 import React, { Component } from 'react'
-import { Alert, Box, Button, Container, Snackbar, Typography, Grid, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material'
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId } from '@mui/x-data-grid'
+import { Box, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent } from '@mui/material'
 import NavBar from './NavBar'
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ChartData
+} from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import type { ChartData, ChartOptions } from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+);
+
+export const options = {
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top' as const,
+        },
+        title: {
+            display: true,
+            text: 'Chart.js Bar Chart',
+        },
+    },
+};
 
 type Props = {}
 
 type State = {
     year: string,
     month: string,
-    product: string,    
-    options: ChartOptions<'bar'>,
-    data: ChartData<'bar'>,
+    product: string,
+    data: ChartData<"bar">
 }
 
 export default class Home extends Component<Props, State> {
+    labels: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+
     state: State = {
         year: "",
         month: "",
         product: "",
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top' as const,
-                },
-                title: {
-                    display: true,
-                    text: 'Chart.js Bar Chart',
-                },
-            },
-        },
         data: {
-            labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+            labels: this.labels,
             datasets: [
                 {
                     label: 'Dataset 1',
-                    data: [12, 40, 21, 2, 32, 10],
+                    data: this.labels.map(() => 50),
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                 },
                 {
                     label: 'Dataset 2',
-                    data: [2, 6, 5, 2, 3, 5],
+                    data: this.labels.map(() => 20),
                     backgroundColor: 'rgba(53, 162, 235, 0.5)',
                 },
             ],
-        },
+        }
     }
+
     /*handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
         if (value !== null) {
             this.setState({ deliveryLocationChoosed: value });
@@ -72,7 +92,7 @@ export default class Home extends Component<Props, State> {
     }
 
     render() {
-        const { year, month, product, options, data } = this.state
+        const { year, month, product, data } = this.state
         return (
             <React.Fragment>
                 <NavBar />
@@ -139,6 +159,7 @@ export default class Home extends Component<Props, State> {
                         <Stack direction="row" justifyContent="center" alignItems="center" spacing={20}>
                             <Box justifyContent="center" sx={{ width: 1000, height: 300, backgroundColor: 'primary.dark' }}>
                             </Box>
+                            <Bar options={options} data={data} />
                         </Stack>
                     </Box>
                 </Box>
