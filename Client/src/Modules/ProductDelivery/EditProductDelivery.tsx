@@ -1,6 +1,5 @@
 import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -35,8 +34,6 @@ type State = {
     message: IMessage,
     productDeliveryEdited: boolean,
 }
-
-const adapter = new AdapterDayjs();
 export default class EditProductDelivery extends Component<Props, State> {
     state: State = {
         productDeliveryId: +document.location.pathname.split("/")[2],
@@ -59,6 +56,11 @@ export default class EditProductDelivery extends Component<Props, State> {
         productDeliveryEdited: false
     }
 
+    addOneDay = (date: Date) => {
+        date.setDate(date.getDate() + 1);
+        return date;
+    }
+
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
@@ -77,16 +79,11 @@ export default class EditProductDelivery extends Component<Props, State> {
             productChoosed: products.find((item) => item.id === productDelivery.productId) || null,
             quantityDelivered: productDelivery.quantityDelivered.toString(),
             soldPrice: productDelivery.soldPrice.toString()
-
         })
 
         if (productDelivery.expirationDate) {
-            this.setState({ expirationDate: new Date(productDelivery.expirationDate) });
-          }
-        console.log('Date: ' + this.state.expirationDate?.toDateString())
-        console.log('Type: ' + typeof this.state.expirationDate)
-
-        console.log(productDelivery)
+            this.setState({ expirationDate:  this.addOneDay(new Date(productDelivery.expirationDate))});
+        }
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,7 +138,6 @@ export default class EditProductDelivery extends Component<Props, State> {
         if (this.validations()) {
             try {
                 const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
-                //console.log(quantityReturned)
                 let qReturnedValue: number | null
                 if (quantityReturned === "") {
                     qReturnedValue = null
@@ -158,7 +154,7 @@ export default class EditProductDelivery extends Component<Props, State> {
                     quantityReturned: qReturnedValue,
                     soldPrice: +soldPrice,
                 }
-                //console.log(productDeliveryToAdd)
+
                 const response = await ProductDeliveryService.updateProductDelivery(productDeliveryId, productDeliveryToEdit)
                 if (response.status === 200) {
                     this.setState({
@@ -313,17 +309,17 @@ export default class EditProductDelivery extends Component<Props, State> {
                                 )}
                             />
                             <br />
-                            <LocalizationProvider dateAdapter={AdapterDayjs} >
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
                                 <DatePicker
                                     // @ts-expect-error
                                     id="expirationDate" variant="outlined" margin="normal" required fullWidth
-                                    label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
+                                    label="Fecha Expiracion * (MM-DD-YYYY)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
                             </LocalizationProvider>
 
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
 
-                            <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
+                            <TextField id="quantityReturned" variant="outlined" margin="normal" fullWidth
                                 label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} />
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth

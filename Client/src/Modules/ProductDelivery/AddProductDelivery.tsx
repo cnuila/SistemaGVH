@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -65,7 +65,6 @@ export default class AddProductDelivery extends Component<Props, State>{
         const { name, value } = e.target
         const wholeNumberRegex = /^\d*$/
         const decimalRegex = /^\d*\.?\d*$/
-        console.log(name + " " + value)
 
         if (name === "quantityDelivered") {
             if (wholeNumberRegex.test(value)) {
@@ -78,13 +77,10 @@ export default class AddProductDelivery extends Component<Props, State>{
             }
         }
     }
-
     handleExpirationDateOnChange = (date: Date | null) => {
         this.setState({
             expirationDate: date,
         });
-        console.log(this.state.expirationDate)
-        console.log(typeof this.state.expirationDate)
     }
 
     handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
@@ -106,19 +102,17 @@ export default class AddProductDelivery extends Component<Props, State>{
         e.preventDefault();
 
         if (this.validations()) {
-            console.log("validations passed")
             try {
                 const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
                 const productDeliveryToAdd: IProductDeliveryData = {
                     id: null,
                     deliveryLocationId: deliveryLocationChoosed!.id,
                     productId: productChoosed!.id,
+                    expirationDate: expirationDate ? expirationDate.toISOString().split("T")[0] : '',
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: null,
                     soldPrice: +soldPrice,
                 }
-                console.log("3")
-                //console.log(productDeliveryToAdd)
                 const response = await ProductDeliveryService.addProductDelivery(productDeliveryToAdd)
                 if (response.status === 201) {
                     this.setState({
@@ -144,7 +138,6 @@ export default class AddProductDelivery extends Component<Props, State>{
             this.prepareMessage("Debes ingresar un Nombre de producto", true);
             return false
         }
-        console.log(expirationDate)
         if (expirationDate === null) {
             this.prepareMessage("Debes ingresar una fecha de expiracion", true);
             return false
@@ -190,10 +183,6 @@ export default class AddProductDelivery extends Component<Props, State>{
         if (productDeliveryCreated) {
             return (<Navigate to={"/entregaproducto"} replace />)
         }
-
-        // function setValue(newValue: string | null): void {
-        //     throw new Error('Function not implemented.');
-        // }
 
         return (
             <React.Fragment>
@@ -282,16 +271,12 @@ export default class AddProductDelivery extends Component<Props, State>{
                             />
 
                             <br></br>
-                            <LocalizationProvider dateAdapter={AdapterDayjs} >
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
                                 <DatePicker
                                     // @ts-expect-error
                                     id="expirationDate" variant="outlined" margin="normal" required fullWidth
-                                    label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
+                                    label="Fecha Expiracion * (MM-DD-YYYY)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
                             </LocalizationProvider>
-
-
-                            {/* <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} /> */}
 
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
