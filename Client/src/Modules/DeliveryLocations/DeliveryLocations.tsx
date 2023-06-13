@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/material'
 import { Navigate } from 'react-router-dom'
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId } from '@mui/x-data-grid'
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowId , esES} from '@mui/x-data-grid'
 import { Edit, Delete } from '@mui/icons-material'
 import NavBar from '../NavBar'
 import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData'
@@ -141,6 +141,7 @@ export default class DeliveryLocations extends Component<Props, State> {
                         </Box>
                         <Box sx={{ height: 500, width: "100%", }}>
                             <DataGrid
+                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                                 sx={{ boxShadow: 3 }}
                                 columns={columnHeaders}
                                 rows={deliveryLocations}

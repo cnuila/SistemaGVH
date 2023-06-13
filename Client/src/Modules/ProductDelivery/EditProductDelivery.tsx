@@ -1,6 +1,9 @@
 import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
-
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
+
 
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
@@ -19,7 +22,7 @@ type State = {
     productDeliveryId: number,
     deliveryLocationChoosed: IDeliveryLocationData | null,
     productChoosed: IProductData | null,
-    expirationDate: string,
+    expirationDate: Date | null,
     quantityDelivered: string,
     quantityReturned: string,
     soldPrice: string,
@@ -31,13 +34,12 @@ type State = {
     message: IMessage,
     productDeliveryEdited: boolean,
 }
-
 export default class EditProductDelivery extends Component<Props, State> {
     state: State = {
         productDeliveryId: +document.location.pathname.split("/")[2],
         deliveryLocationChoosed: null,
         productChoosed: null,
-        expirationDate: "",
+        expirationDate: null,
         quantityDelivered: "0",
         quantityReturned: "0",
         soldPrice: "0",
@@ -52,6 +54,11 @@ export default class EditProductDelivery extends Component<Props, State> {
             type: "success"
         },
         productDeliveryEdited: false
+    }
+
+    addOneDay = (date: Date) => {
+        date.setDate(date.getDate() + 1);
+        return date;
     }
 
     async componentDidMount() {
@@ -70,33 +77,21 @@ export default class EditProductDelivery extends Component<Props, State> {
         this.setState({
             deliveryLocationChoosed: deliveryLocations.find((item) => item.id === productDelivery.deliveryLocationId) || null,
             productChoosed: products.find((item) => item.id === productDelivery.productId) || null,
-            expirationDate: productDelivery.expirationDate.toString(),
             quantityDelivered: productDelivery.quantityDelivered.toString(),
             soldPrice: productDelivery.soldPrice.toString()
         })
-        console.log(this.state.deliveryLocations)
-        console.log(this.state.products)
-        console.log(Number(productDelivery.deliveryLocationId))
-        console.log(Number(productDelivery.productId))
-        console.log(productDelivery)
-        console.log(this.state.deliveryLocationChoosed)
-        console.log(this.state.productChoosed)
+
+        if (productDelivery.expirationDate) {
+            this.setState({ expirationDate:  this.addOneDay(new Date(productDelivery.expirationDate))});
+        }
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
 
         const wholeNumberRegex = /^\d*$/
-        //const dateRegex = /^(([1-9])|(0[1-9])|(1[0-2]))\/(([1-9])|(0[1-9])|([12][0-9])|(3[01]))\/((19|20)\d{2})$/
         const decimalRegex = /^\d*\.?\d*$/
-        if (name === "expirationDate") {
-            this.setState({ expirationDate: value })
-            // if (dateRegex.test(value)) {
-            //   const [day, month, year] = value.split("-").reverse();
-            //   const formattedDate = `${month}/${day}/${year}`;
-            //   this.setState({ expirationDate: formattedDate });
-            // }
-        }
+
         if (name === "quantityDelivered") {
             if (wholeNumberRegex.test(value)) {
                 this.setState({ quantityDelivered: value })
@@ -111,6 +106,14 @@ export default class EditProductDelivery extends Component<Props, State> {
             if (decimalRegex.test(value)) {
                 this.setState({ soldPrice: value })
             }
+        }
+    }
+
+    handleExpirationDateOnChange = (date: Date | null) => {
+        if (date !== null) {
+            this.setState({ expirationDate: date });
+        } else {
+            this.setState({ deliveryLocationChoosed: null });
         }
     }
 
@@ -135,7 +138,6 @@ export default class EditProductDelivery extends Component<Props, State> {
         if (this.validations()) {
             try {
                 const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
-                //console.log(quantityReturned)
                 let qReturnedValue: number | null
                 if (quantityReturned === "") {
                     qReturnedValue = null
@@ -147,12 +149,12 @@ export default class EditProductDelivery extends Component<Props, State> {
                     id: productDeliveryId,
                     deliveryLocationId: deliveryLocationChoosed!.id,
                     productId: productChoosed!.id,
-                    expirationDate,
+                    expirationDate: expirationDate ? expirationDate.toISOString().split("T")[0] : '',
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: qReturnedValue,
                     soldPrice: +soldPrice,
                 }
-                //console.log(productDeliveryToAdd)
+
                 const response = await ProductDeliveryService.updateProductDelivery(productDeliveryId, productDeliveryToEdit)
                 if (response.status === 200) {
                     this.setState({
@@ -168,8 +170,6 @@ export default class EditProductDelivery extends Component<Props, State> {
 
     validations = () => {
         const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
-        // console.log(deliveryLocationChoosed)
-        // console.log(productChoosed)
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -178,7 +178,7 @@ export default class EditProductDelivery extends Component<Props, State> {
             this.prepareMessage("Debes ingresar un Nombre de producto", true);
             return false
         }
-        if (expirationDate === "") {
+        if (expirationDate === null) {
             this.prepareMessage("Debes ingresar una fecha de expiracion", true);
             return false
         }
@@ -263,7 +263,7 @@ export default class EditProductDelivery extends Component<Props, State> {
                                         {...params}
                                         label="Ubicacion de Entrega"
 
-                                        value = {deliveryLocationChoosed?.name}
+                                        value={deliveryLocationChoosed?.name}
                                         InputProps={{
                                             ...params.InputProps,
                                             endAdornment: (
@@ -308,14 +308,18 @@ export default class EditProductDelivery extends Component<Props, State> {
                                     />
                                 )}
                             />
-
-                            <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
+                            <br />
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
+                                <DatePicker
+                                    // @ts-expect-error
+                                    id="expirationDate" variant="outlined" margin="normal" required fullWidth
+                                    label="Fecha Expiracion * (MM-DD-YYYY)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
+                            </LocalizationProvider>
 
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
 
-                            <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
+                            <TextField id="quantityReturned" variant="outlined" margin="normal" fullWidth
                                 label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} />
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth

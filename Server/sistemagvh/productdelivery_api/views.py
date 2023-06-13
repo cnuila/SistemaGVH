@@ -18,11 +18,6 @@ class ProductDeliveryListApiView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [FirebaseAuthentication]
 
-    # retrieve every productDelivery on the db
-    # def get(self, request, *args, **kwargs):
-    #     product_delivery = ProductDelivery.objects.order_by("expirationDate")
-    #     serializer = ProductDeliverySerializer(product_delivery, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
     def get(self, request, *args, **kwargs):
         one_day_ago = timezone.now() - timedelta(days=1)
         product_delivery = ProductDelivery.objects.order_by('expirationDate').select_related(
@@ -38,25 +33,7 @@ class ProductDeliveryListApiView(APIView):
             )
         return Response(product_delivery, status=status.HTTP_200_OK)
 
-    
-    # add a productDelivery
-    # add a productDelivery
     def post(self, request, *args, **kwargs):
-        # delivery_location_name = request.data.get('deliveryLocationId__name')
-        # product_description = request.data.get('productId__description')
-
-        # try:
-        #     delivery_location = DeliveryLocations.objects.get(name=delivery_location_name)
-        # except DeliveryLocations.DoesNotExist:
-        #     return Response({"res": f"No se encontró la locación de entrega con el nombre: {delivery_location_name}"}, 
-        #         status=status.HTTP_400_BAD_REQUEST)
-
-        # try:
-        #     product = Product.objects.get(description=product_description)
-        # except Product.DoesNotExist:
-        #     return Response({"res": f"No se encontró el producto con la descripción: {product_description}"}, 
-        #         status=status.HTTP_400_BAD_REQUEST)
-
 
         data = {
             'deliveryLocationId': request.data.get('deliveryLocationId'),
@@ -67,7 +44,10 @@ class ProductDeliveryListApiView(APIView):
             'quantityReturned': None,
             'soldPrice': request.data.get('soldPrice'),
         }
+        print(request.data.get('expirationDate'))
+
         serializer = ProductDeliverySerializer(data=data)
+        print('serializer passed')
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -138,7 +118,6 @@ class ProductDeliveryListWithReturnsApiView(APIView):
     authentication_classes = [FirebaseAuthentication]
 
     def get(self, request, *args, **kwargs):
-        #one_day_ago = timezone.now() - timedelta(days=1)
         product_delivery = ProductDelivery.objects.exclude(quantityReturned__isnull=True).order_by('deliveryLocationId__name').select_related(
                 'deliveryLocationId', 'productId'
             ).values(
@@ -151,40 +130,4 @@ class ProductDeliveryListWithReturnsApiView(APIView):
                 'soldPrice',
             )
         return Response(product_delivery, status=status.HTTP_200_OK)
-    
-# class ProductDeliveryByLocationApiView(APIView):
-#     permission_classes = [IsAuthenticated]
-#     authentication_classes = [FirebaseAuthentication]
-
-#     def get_product_delivery(self, delivery_location_id):
-#         try:
-#             return ProductDelivery.objects.filter(deliveryLocationId=delivery_location_id).order_by("expirationDate")
-#         except ProductDelivery.DoesNotExist:
-#             return None
-
-#     # get the productDelivery locaiton by id
-#     def get(self, request, delivery_location_id, *args, **kwargs):
-#         prod_deliv_location = self.get_product_delivery(delivery_location_id)
-#         if not prod_deliv_location:
-#             return Response(
-#                 {"res": "No se encontró el Lugar de Entrega con ese Id."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-
-#         product_delivery = ProductDelivery.objects.filter(deliveryLocationId=delivery_location_id).order_by("expirationDate").select_related(
-#                 'deliveryLocationId', 'productId'
-#             ).values(
-#                 'id',
-#                 'deliveryLocationId__name',
-#                 'productId__description',
-#                 'expirationDate',
-#                 'quantityDelivered',
-#                 'quantityReturned',
-#                 'soldPrice',
-#             )
-#         if not product_delivery:
-#             return Response(
-#                 {"res": "No se encontró el Product Delivery con ese Id."},
-#                 status=status.HTTP_400_BAD_REQUEST
-#             )
-#         return Response(product_delivery, status=status.HTTP_200_OK)
+ 
