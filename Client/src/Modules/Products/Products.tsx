@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/material'
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId } from '@mui/x-data-grid'
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, esES } from '@mui/x-data-grid'
 import { Delete, Edit } from '@mui/icons-material'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
@@ -143,6 +143,7 @@ export default class Products extends Component<Props, State> {
                         </Box>
                         <Box sx={{ height: 500, width: "100%", }}>
                             <DataGrid
+                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                                 sx={{ boxShadow: 3 }}
                                 columns={columnHeaders}
                                 rows={products}

@@ -3,13 +3,10 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
+
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
-
-// import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-// import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-// import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
@@ -24,7 +21,7 @@ type Props = {}
 type State = {
     deliveryLocationChoosed: IDeliveryLocationData | null,
     productChoosed: IProductData | null,
-    expirationDate: string,
+    expirationDate: Date | null,
     quantityDelivered: string,
     soldPrice: string,
     message: IMessage,
@@ -42,7 +39,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     state: State = {
         deliveryLocationChoosed: null,
         productChoosed: null,
-        expirationDate: "",
+        expirationDate: null,
         quantityDelivered: "0",
         soldPrice: "0",
         message: {
@@ -57,16 +54,9 @@ export default class AddProductDelivery extends Component<Props, State>{
         deliveryLocations: []
     }
 
-    // componentDidMount() {
-    //     DeliveryLocationService.getDeliveryLocationNames().then((response) => {
-    //       this.setState({ deliveryLocationsListAutoComplete: response.data });
-    //     });
-    // }
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
-        // console.log(products)
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        // console.log(deliveryLocations)
         this.setState({ deliveryLocations })
         this.setState({ products })
     }
@@ -77,9 +67,6 @@ export default class AddProductDelivery extends Component<Props, State>{
         const decimalRegex = /^\d*\.?\d*$/
         console.log(name + " " + value)
 
-        if (name === "expirationDate") {
-            this.setState({ expirationDate: value })
-        }
         if (name === "quantityDelivered") {
             if (wholeNumberRegex.test(value)) {
                 this.setState({ quantityDelivered: value })
@@ -90,6 +77,14 @@ export default class AddProductDelivery extends Component<Props, State>{
                 this.setState({ soldPrice: value })
             }
         }
+    }
+
+    handleExpirationDateOnChange = (date: Date | null) => {
+        this.setState({
+            expirationDate: date,
+        });
+        console.log(this.state.expirationDate)
+        console.log(typeof this.state.expirationDate)
     }
 
     handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
@@ -118,7 +113,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                     id: null,
                     deliveryLocationId: deliveryLocationChoosed!.id,
                     productId: productChoosed!.id,
-                    expirationDate,
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: null,
                     soldPrice: +soldPrice,
@@ -133,17 +127,15 @@ export default class AddProductDelivery extends Component<Props, State>{
                 }
 
             } catch (error) {
+                console.error(error);
                 this.prepareMessage("Error desconocido, intenta de nuevo.", true)
             }
         }
     }
 
+
     validations = () => {
         const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
-        console.log(deliveryLocationChoosed)
-        console.log(productChoosed)
-        // const selectedLocation = deliveryLocations.find(location => location.name === newValue.name);
-        // const selectedLocationId = selectedLocation.id;
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -152,7 +144,8 @@ export default class AddProductDelivery extends Component<Props, State>{
             this.prepareMessage("Debes ingresar un Nombre de producto", true);
             return false
         }
-        if (expirationDate === "") {
+        console.log(expirationDate)
+        if (expirationDate === null) {
             this.prepareMessage("Debes ingresar una fecha de expiracion", true);
             return false
         }
@@ -219,11 +212,6 @@ export default class AddProductDelivery extends Component<Props, State>{
 
                         </Box>
                         <Box component="form" sx={{ display: "flex", flexDirection: "column" }} noValidate onSubmit={this.handleOnSubmit}>
-
-                            {/* <TextField id="deliveryLocationId__name" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Nombre Ubicacion" name="deliveryLocationId__name" value={deliveryLocationId__name} onChange={this.handleOnChange}/> */}
-
-
                             <Autocomplete
                                 id="deliveryLocation"
                                 sx={{ marginTop: 2 }}
@@ -294,28 +282,20 @@ export default class AddProductDelivery extends Component<Props, State>{
                             />
 
                             <br></br>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker />
+                            <LocalizationProvider dateAdapter={AdapterDayjs} >
+                                <DatePicker
+                                    // @ts-expect-error
+                                    id="expirationDate" variant="outlined" margin="normal" required fullWidth
+                                    label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleExpirationDateOnChange} />
                             </LocalizationProvider>
 
-                            <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} />
 
-                            {/* <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="date"
-                                label="Fecha de Expiracion" name="expirationDate"  value={expirationDate} 
-                                //onChange={this.handleOnChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                            /> */}
-                            {/* <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker label="Basic date picker" />
-                            </LocalizationProvider> */}
+                            {/* <TextField id="expirationDate" variant="outlined" margin="normal" required fullWidth type="text"
+                                label="Fecha Expiracion (YYYY-MM-DD)" name="expirationDate" value={expirationDate} onChange={this.handleOnChange} /> */}
 
                             <TextField id="quantityDelivered" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad Entregada" name="quantityDelivered" value={quantityDelivered} onChange={this.handleOnChange} />
-                            {/* <TextField id="quantityReturned" variant="outlined" margin="normal" required fullWidth
-                                label="Cantidad Devuelta" name="quantityReturned" value={quantityReturned} onChange={this.handleOnChange} /> */}
+
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
 

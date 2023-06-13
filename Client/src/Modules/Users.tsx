@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import NavBar from './NavBar'
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId } from '@mui/x-data-grid';
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowId , esES} from '@mui/x-data-grid';
 import { Delete, Security } from "@mui/icons-material";
 import { Alert, Box, Container, Snackbar, Typography } from '@mui/material';
 import UserService from '../Services/UserService';
@@ -132,6 +132,7 @@ export default class Users extends Component<Props, State>{
                         </Box>
                         <Box sx={{ height: 500, width: "100%", }}>
                             <DataGrid
+                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                                 sx={{ boxShadow: 3 }}
                                 columns={columnHeaders}
                                 rows={users}
