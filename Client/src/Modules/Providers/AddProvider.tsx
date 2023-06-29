@@ -3,38 +3,33 @@ import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
 import IMessage from '../../Utilities/Interfaces/IMessage'
-import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData'
-import DeliveryLocationService from '../../Services/DeliveryLocationService'
+import IProviderData from '../../Utilities/Interfaces/IProviderData'
+import ProviderService from '../../Services/ProviderService'
 
-type Props = { } 
+type Props = {}
 
 type State = {
     name: string,
-    address: string,
-    message: IMessage,
-    deliveryLocationCreated: boolean
+    message: IMessage
+    providerCreated: boolean
 }
 
-export default class AddDeliveryLocation extends Component<Props, State> {
+export default class AddProvider extends Component<Props, State> {
 
     state: State = {
         name: "",
-        address: "",
         message: {
             show: false,
             text: "",
             type: "success"
         },
-        deliveryLocationCreated: false
+        providerCreated: false
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         if (name === "name") {
             this.setState({ name: value })
-        }
-        if (name === "address") {
-            this.setState({ address: value })
         }
     }
 
@@ -43,17 +38,16 @@ export default class AddDeliveryLocation extends Component<Props, State> {
 
         if (this.validations()) {
             try {
-                const { name, address } = this.state
-                const deliveryLocationToAdd: IDeliveryLocationData = {
+                const { name } = this.state
+                const providerToAdd: IProviderData = {
                     id: null,
                     name,
-                    address,
                 }
 
-                const response = await DeliveryLocationService.addDeliveryLocation(deliveryLocationToAdd)
+                const response = await ProviderService.addProvider(providerToAdd)
                 if (response.status === 201) {
                     this.setState({
-                        deliveryLocationCreated: true
+                        providerCreated: true
                     })
                 }
 
@@ -64,16 +58,12 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     }
 
     validations = () => {
-        const { name, address } = this.state
+        const { name } = this.state
         if (name === "") {
             this.prepareMessage("Debes ingresar un Nombre", true);
             return false
         }
 
-        if (address === "") {
-            this.prepareMessage("Debes ingresar una Dirección", true);
-            return false
-        }
         return true
     }
 
@@ -101,10 +91,10 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     };
 
     render() {
-        const { name, address, message, deliveryLocationCreated } = this.state
+        const { name, message, providerCreated } = this.state
 
-        if (deliveryLocationCreated) {
-            return (<Navigate to={"/lugaresentrega"} replace />)
+        if (providerCreated) {
+            return (<Navigate to={"/proveedores"} replace />)
         }
 
         return (
@@ -119,7 +109,7 @@ export default class AddDeliveryLocation extends Component<Props, State> {
                     <Container>
                         <Box sx={{ my: 3 }}>
                             <Typography variant="h4" sx={{ color: "#464555" }}>
-                                <b>Crear Lugar de Entrega</b>
+                                <b>Crear Proveedor</b>
                             </Typography>
 
                         </Box>
@@ -127,8 +117,6 @@ export default class AddDeliveryLocation extends Component<Props, State> {
                             <TextField id="name" variant="outlined" margin="normal" required fullWidth type="text"
                                 label="Nombre" name="name" value={name} onChange={this.handleOnChange}
                             />
-                            <TextField id="address" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Dirección" name="address" value={address} onChange={this.handleOnChange} />
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
                         </Box>

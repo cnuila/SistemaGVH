@@ -3,38 +3,43 @@ import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
 import IMessage from '../../Utilities/Interfaces/IMessage'
-import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData'
-import DeliveryLocationService from '../../Services/DeliveryLocationService'
+import IDeliveryZoneData from '../../Utilities/Interfaces/IDeliveryZoneData'
+import DeliveryZoneService from '../../Services/DeliveryZoneService'
 
-type Props = { } 
+type Props = {}
 
 type State = {
+    deliveryZoneId: number,
     name: string,
-    address: string,
-    message: IMessage,
-    deliveryLocationCreated: boolean
+    message: IMessage
+    deliveryZoneEdited: boolean
 }
 
-export default class AddDeliveryLocation extends Component<Props, State> {
-
+export default class EditDeliveryZone extends Component<Props, State> {
+    
     state: State = {
+        deliveryZoneId: +document.location.pathname.split("/")[2],
         name: "",
-        address: "",
         message: {
             show: false,
             text: "",
             type: "success"
         },
-        deliveryLocationCreated: false
+        deliveryZoneEdited: false
+    }
+
+    async componentDidMount() {
+        const { deliveryZoneId } = this.state
+        const deliveryZone = (await DeliveryZoneService.getById(deliveryZoneId)).data
+        this.setState({
+            name: deliveryZone.name,
+        })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
         if (name === "name") {
             this.setState({ name: value })
-        }
-        if (name === "address") {
-            this.setState({ address: value })
         }
     }
 
@@ -43,17 +48,16 @@ export default class AddDeliveryLocation extends Component<Props, State> {
 
         if (this.validations()) {
             try {
-                const { name, address } = this.state
-                const deliveryLocationToAdd: IDeliveryLocationData = {
-                    id: null,
+                const { deliveryZoneId, name } = this.state
+                const deliveryZoneToEdit: IDeliveryZoneData = {
+                    id: deliveryZoneId,
                     name,
-                    address,
                 }
 
-                const response = await DeliveryLocationService.addDeliveryLocation(deliveryLocationToAdd)
-                if (response.status === 201) {
+                const response = await DeliveryZoneService.updateDeliveryZone(deliveryZoneId, deliveryZoneToEdit)
+                if (response.status === 200) {
                     this.setState({
-                        deliveryLocationCreated: true
+                        deliveryZoneEdited: true
                     })
                 }
 
@@ -64,16 +68,12 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     }
 
     validations = () => {
-        const { name, address } = this.state
+        const { name } = this.state
         if (name === "") {
             this.prepareMessage("Debes ingresar un Nombre", true);
             return false
         }
 
-        if (address === "") {
-            this.prepareMessage("Debes ingresar una Dirección", true);
-            return false
-        }
         return true
     }
 
@@ -101,10 +101,10 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     };
 
     render() {
-        const { name, address, message, deliveryLocationCreated } = this.state
+        const { name, message, deliveryZoneEdited } = this.state
 
-        if (deliveryLocationCreated) {
-            return (<Navigate to={"/lugaresentrega"} replace />)
+        if (deliveryZoneEdited) {
+            return (<Navigate to={"/zonasentrega"} replace />)
         }
 
         return (
@@ -119,18 +119,16 @@ export default class AddDeliveryLocation extends Component<Props, State> {
                     <Container>
                         <Box sx={{ my: 3 }}>
                             <Typography variant="h4" sx={{ color: "#464555" }}>
-                                <b>Crear Lugar de Entrega</b>
+                                <b>Editar Zona de Entrega</b>
                             </Typography>
 
                         </Box>
                         <Box component="form" sx={{ display: "flex", flexDirection: "column" }} noValidate onSubmit={this.handleOnSubmit}>
                             <TextField id="name" variant="outlined" margin="normal" required fullWidth type="text"
                                 label="Nombre" name="name" value={name} onChange={this.handleOnChange}
-                            />
-                            <TextField id="address" variant="outlined" margin="normal" required fullWidth type="text"
-                                label="Dirección" name="address" value={address} onChange={this.handleOnChange} />
+                            />                            
 
-                            <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
+                            <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Editar</Button>
                         </Box>
                     </Container>
                 </Box>

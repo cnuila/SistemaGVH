@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { AppBar, Avatar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography } from '@mui/material'
-import { Menu, Logout, People, Home, Inventory, Domain, LocalShipping  } from '@mui/icons-material';
+import { Menu, Logout, People, Home, Inventory, Domain, LocalShipping, EmojiTransportation, LocationOn  } from '@mui/icons-material';
 import { AuthContext } from '../Auth/AuthContext';
 import { signUserOut } from '../Auth/AuthOperations';
 import { Link } from 'react-router-dom';
@@ -100,8 +100,24 @@ export default class NavBar extends Component<Props, State> {
                             <Link to="/entregaproducto" style={{ textDecoration: 'none', color:"white" }}>
                                 <ListItem disablePadding>
                                     <ListItemButton>
-                                        <ListItemIcon sx={{ color: "white" }}><LocalShipping     /></ListItemIcon>
+                                        <ListItemIcon sx={{ color: "white" }}><LocalShipping /></ListItemIcon>
                                         <ListItemText primary={"Entregas de Productos"} />
+                                    </ListItemButton>
+                                </ListItem>
+                            </Link>
+                            <Link to="/zonasentrega" style={{ textDecoration: 'none', color:"white" }}>
+                                <ListItem disablePadding>
+                                    <ListItemButton>
+                                        <ListItemIcon sx={{ color: "white" }}><LocationOn /></ListItemIcon>
+                                        <ListItemText primary={"Zonas de Entrega"} />
+                                    </ListItemButton>
+                                </ListItem>
+                            </Link>
+                            <Link to="/proveedores" style={{ textDecoration: 'none', color:"white" }}>
+                                <ListItem disablePadding>
+                                    <ListItemButton>
+                                        <ListItemIcon sx={{ color: "white" }}><EmojiTransportation /></ListItemIcon>
+                                        <ListItemText primary={"Proveedores"} />
                                     </ListItemButton>
                                 </ListItem>
                             </Link>
