@@ -10,17 +10,17 @@ import NavBar from '../NavBar'
 
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
-import IProductData from '../../Utilities/Interfaces/IProductData'
 import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData';
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import ProductService from '../../Services/ProductService';
+import IProductViewData from '../../Utilities/Interfaces/IProductViewData';
 
 type Props = {}
 
 type State = {
     deliveryLocationChoosed: IDeliveryLocationData | null,
-    productChoosed: IProductData | null,
+    productChoosed: IProductViewData | null,
     expirationDate: Date | null,
     quantityDelivered: string,
     soldPrice: string,
@@ -28,14 +28,12 @@ type State = {
     productDeliveryCreated: boolean
     openProducts: boolean,
     openDeliveryLocations: boolean,
-    products: IProductData[],
+    products: IProductViewData[],
     deliveryLocations: IDeliveryLocationData[]
 }
 
-
-
-
 export default class AddProductDelivery extends Component<Props, State>{
+
     state: State = {
         deliveryLocationChoosed: null,
         productChoosed: null,
@@ -57,8 +55,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        this.setState({ deliveryLocations })
-        this.setState({ products })
+        this.setState({ deliveryLocations, products })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,7 +87,7 @@ export default class AddProductDelivery extends Component<Props, State>{
             this.setState({ deliveryLocationChoosed: null });
         }
     }
-    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductData | null) => {
+    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductViewData | null) => {
         if (value !== null) {
             this.setState({ productChoosed: value });
         } else {
@@ -126,7 +123,6 @@ export default class AddProductDelivery extends Component<Props, State>{
             }
         }
     }
-
 
     validations = () => {
         const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
@@ -191,6 +187,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                         {message.text}
                     </Alert>
                 </Snackbar>
+
                 <NavBar />
                 <Box sx={{ height: "100vh", display: "flex" }}>
                     <Container>
@@ -217,7 +214,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 options={deliveryLocations}
                                 onChange={this.handleDeliveryLocationChange}
                                 value={deliveryLocationChoosed}
-                                // loading={loading}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -228,7 +224,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
@@ -236,6 +231,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                     />
                                 )}
                             />
+
                             <Autocomplete
                                 id="product"
                                 sx={{ marginTop: 2 }}
@@ -246,12 +242,11 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 onClose={() => {
                                     this.setState({ openProducts: false })
                                 }}
-                                isOptionEqualToValue={(option: IProductData, value: IProductData) => option.description === value.description}
-                                getOptionLabel={(option: IProductData) => option.description}
+                                isOptionEqualToValue={(option: IProductViewData, value: IProductViewData) => option.description === value.description}
+                                getOptionLabel={(option: IProductViewData) => option.description}
                                 options={products}
                                 onChange={this.handleProductChange}
                                 value={productChoosed}
-                                // loading={loading}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -261,8 +256,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
-                                                    {params.InputProps.endAdornment}
+                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
                                         }}

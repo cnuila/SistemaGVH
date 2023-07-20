@@ -1,4 +1,4 @@
-export default interface IProductData {
+export default interface IProductViewData {
     id: number | null,
     code: string, 
     description: string,
@@ -6,4 +6,5 @@ export default interface IProductData {
     sellingPrice: number,
     quantity: number,
     providerId: number | null,
+    providerName: string, 
 }

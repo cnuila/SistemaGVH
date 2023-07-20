@@ -40,14 +40,11 @@ class ProductDeliveryListApiView(APIView):
             'productId': request.data.get('productId'),
             'expirationDate': request.data.get('expirationDate'),
             'quantityDelivered': request.data.get('quantityDelivered'),
-            #'quantityReturned': request.data.get('quantityReturned'),
             'quantityReturned': None,
             'soldPrice': request.data.get('soldPrice'),
         }
-        print(request.data.get('expirationDate'))
-
+        
         serializer = ProductDeliverySerializer(data=data)
-        print('serializer passed')
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

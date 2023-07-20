@@ -1,18 +1,22 @@
-import { Alert, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
+import { Alert, Autocomplete, Box, Button, Container, Snackbar, TextField, Typography } from '@mui/material'
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
+import IDeliveryZoneData from '../../Utilities/Interfaces/IDeliveryZoneData'
+import DeliveryZoneService from '../../Services/DeliveryZoneService'
 
-type Props = { } 
+type Props = {}
 
 type State = {
     name: string,
     address: string,
     message: IMessage,
-    deliveryLocationCreated: boolean
+    deliveryLocationCreated: boolean,
+    deliveryZones: IDeliveryZoneData[],
+    selectedDeliveryZone: IDeliveryZoneData | null,
 }
 
 export default class AddDeliveryLocation extends Component<Props, State> {
@@ -25,7 +29,14 @@ export default class AddDeliveryLocation extends Component<Props, State> {
             text: "",
             type: "success"
         },
-        deliveryLocationCreated: false
+        deliveryLocationCreated: false,
+        deliveryZones: [],
+        selectedDeliveryZone: null
+    }
+
+    async componentDidMount() {
+        const deliveryZones = (await DeliveryZoneService.getAll()).data
+        this.setState({ deliveryZones })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,16 +49,25 @@ export default class AddDeliveryLocation extends Component<Props, State> {
         }
     }
 
+    handleDeliveryZoneChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryZoneData | null) => {
+        if (value !== null) {
+            this.setState({ selectedDeliveryZone: value });
+        } else {
+            this.setState({ selectedDeliveryZone: null });
+        }
+    }
+
     handleOnSubmit = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         if (this.validations()) {
             try {
-                const { name, address } = this.state
+                const { name, address, selectedDeliveryZone } = this.state
                 const deliveryLocationToAdd: IDeliveryLocationData = {
                     id: null,
                     name,
                     address,
+                    deliveryZoneId: selectedDeliveryZone!.id
                 }
 
                 const response = await DeliveryLocationService.addDeliveryLocation(deliveryLocationToAdd)
@@ -64,7 +84,7 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     }
 
     validations = () => {
-        const { name, address } = this.state
+        const { name, address, selectedDeliveryZone } = this.state
         if (name === "") {
             this.prepareMessage("Debes ingresar un Nombre", true);
             return false
@@ -72,6 +92,11 @@ export default class AddDeliveryLocation extends Component<Props, State> {
 
         if (address === "") {
             this.prepareMessage("Debes ingresar una Dirección", true);
+            return false
+        }
+
+        if (selectedDeliveryZone == null) {
+            this.prepareMessage("Debes seleccionar un Zona de Entrega", true);
             return false
         }
         return true
@@ -101,7 +126,7 @@ export default class AddDeliveryLocation extends Component<Props, State> {
     };
 
     render() {
-        const { name, address, message, deliveryLocationCreated } = this.state
+        const { name, address, message, deliveryLocationCreated, deliveryZones, selectedDeliveryZone } = this.state
 
         if (deliveryLocationCreated) {
             return (<Navigate to={"/lugaresentrega"} replace />)
@@ -129,6 +154,31 @@ export default class AddDeliveryLocation extends Component<Props, State> {
                             />
                             <TextField id="address" variant="outlined" margin="normal" required fullWidth type="text"
                                 label="Dirección" name="address" value={address} onChange={this.handleOnChange} />
+
+                            <Autocomplete
+                                id="deliveryZone"
+                                sx={{ marginTop: 2 }}
+                                isOptionEqualToValue={(option: IDeliveryZoneData, value: IDeliveryZoneData) => option.name === value.name}
+                                getOptionLabel={(option: IDeliveryZoneData) => option.name}
+                                options={deliveryZones}
+                                onChange={this.handleDeliveryZoneChange}
+                                value={selectedDeliveryZone}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Zona de Entrega"
+                                        required
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
                         </Box>

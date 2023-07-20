@@ -5,8 +5,11 @@ import NavBar from '../NavBar'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductData from '../../Utilities/Interfaces/IProductData'
 import ProductService from '../../Services/ProductService'
+import Autocomplete from '@mui/material/Autocomplete';
+import IProviderData from '../../Utilities/Interfaces/IProviderData'
+import ProviderService from '../../Services/ProviderService'
 
-type Props = { } 
+type Props = {}
 
 type State = {
     code: string,
@@ -15,7 +18,9 @@ type State = {
     sellingPrice: string,
     quantity: string,
     message: IMessage,
-    productCreated: boolean
+    productCreated: boolean,
+    providers: IProviderData[],
+    selectedProvider: IProviderData | null,
 }
 
 export default class AddProduct extends Component<Props, State>{
@@ -31,7 +36,14 @@ export default class AddProduct extends Component<Props, State>{
             text: "",
             type: "success"
         },
-        productCreated: false
+        productCreated: false,
+        providers: [],
+        selectedProvider: null,
+    }
+
+    async componentDidMount() {
+        const providers = (await ProviderService.getAll()).data
+        this.setState({ providers })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,24 +53,32 @@ export default class AddProduct extends Component<Props, State>{
         }
         if (name === "description") {
             this.setState({ description: value })
-        }        
+        }
 
         const decimalRegex = /^\d*\.?\d*$/
         if (name === "cost") {
-            if (decimalRegex.test(value)){
+            if (decimalRegex.test(value)) {
                 this.setState({ cost: value })
-            }            
+            }
         }
         if (name === "sellingPrice") {
-            if (decimalRegex.test(value)){
+            if (decimalRegex.test(value)) {
                 this.setState({ sellingPrice: value })
-            }                 
+            }
         }
         const wholeNumberRegex = /^\d*$/
         if (name === "quantity") {
-            if (wholeNumberRegex.test(value)){
+            if (wholeNumberRegex.test(value)) {
                 this.setState({ quantity: value })
-            }            
+            }
+        }
+    }
+
+    handleProviderChange = (event: SyntheticEvent<Element, Event>, value: IProviderData | null) => {
+        if (value !== null) {
+            this.setState({ selectedProvider: value });
+        } else {
+            this.setState({ selectedProvider: null });
         }
     }
 
@@ -67,14 +87,15 @@ export default class AddProduct extends Component<Props, State>{
 
         if (this.validations()) {
             try {
-                const { code, description, cost, sellingPrice, quantity } = this.state
+                const { code, description, cost, sellingPrice, quantity, selectedProvider } = this.state
                 const productToAdd: IProductData = {
                     id: null,
                     code,
                     description,
                     cost: +cost,
                     sellingPrice: +sellingPrice,
-                    quantity: +quantity
+                    quantity: +quantity,
+                    providerId: selectedProvider!.id
                 }
 
                 const response = await ProductService.addProduct(productToAdd)
@@ -91,7 +112,7 @@ export default class AddProduct extends Component<Props, State>{
     }
 
     validations = () => {
-        const { code, description, cost, sellingPrice, quantity } = this.state
+        const { code, description, cost, sellingPrice, quantity, selectedProvider } = this.state
         if (code === "") {
             this.prepareMessage("Debes ingresar un Código", true);
             return false
@@ -114,6 +135,11 @@ export default class AddProduct extends Component<Props, State>{
 
         if (quantity === "") {
             this.prepareMessage("Debes ingresar una Cantidad", true);
+            return false
+        }
+
+        if (selectedProvider == null) {
+            this.prepareMessage("Debes seleccionar un Proveedor", true);
             return false
         }
         return true
@@ -143,9 +169,9 @@ export default class AddProduct extends Component<Props, State>{
     };
 
     render() {
-        const { code, description, cost, sellingPrice, quantity, message, productCreated } = this.state
+        const { code, description, cost, sellingPrice, quantity, message, productCreated, providers, selectedProvider } = this.state
 
-        if(productCreated){
+        if (productCreated) {
             return (<Navigate to={"/productos"} replace />)
         }
 
@@ -180,6 +206,31 @@ export default class AddProduct extends Component<Props, State>{
 
                             <TextField id="quantity" type="text" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad" name="quantity" value={quantity} onChange={this.handleOnChange} />
+
+                            <Autocomplete
+                                id="provider"
+                                sx={{ marginTop: 2 }}
+                                isOptionEqualToValue={(option: IProviderData, value: IProviderData) => option.name === value.name}
+                                getOptionLabel={(option: IProviderData) => option.name}
+                                options={providers}
+                                onChange={this.handleProviderChange}
+                                value={selectedProvider}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Nombre del Proveedor"
+                                        required
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
                         </Box>

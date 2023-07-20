@@ -58,10 +58,6 @@ export default class ProductDelivery extends Component<Props, State>{
         }
     }
 
-    
-
-
-
     async componentDidMount() {
         const productDelivery = (await ProductDeliveryService.getAll()).data
         this.setState({
@@ -123,7 +119,6 @@ export default class ProductDelivery extends Component<Props, State>{
         });
     };
 
-
     async fetchProductDeliveryData(filterValue: string) {
         if (filterValue === "todas") {
             const productDelivery = (await ProductDeliveryService.getAll()).data;
@@ -140,7 +135,6 @@ export default class ProductDelivery extends Component<Props, State>{
 
     handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const filterValue = e.target.value;
-        //console.log(filterValue)
         this.setState({
             selectedRadio: filterValue
         });
@@ -179,8 +173,7 @@ export default class ProductDelivery extends Component<Props, State>{
                                 value={this.state.selectedRadio}
                                 sx={{ transform: "translateY(-2px)" }}
                                 onChange={this.handleChange}
-                            //onChange={(e) => this.setState({ selectedRadio: e.target.value })}
-                            >
+                                >
                                 <FormControlLabel value="todas" control={<Radio />} label="Todas las Entregas" />
                                 <FormControlLabel value="devoluciones" control={<Radio />} label="Entregas con Devoluciones" />
                             </RadioGroup>

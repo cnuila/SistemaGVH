@@ -1,5 +1,6 @@
 import http from "../Utilities/AxiosObject"
 import IDeliveryLocationData from "../Utilities/Interfaces/IDeliveryLocationData"
+import IDeliveryLocationViewData from "../Utilities/Interfaces/IDeliveryLocationViewData"
 
 class DeliveryLocationService {
 
@@ -8,7 +9,7 @@ class DeliveryLocationService {
     }
 
     getAll(){
-        return http.get<Array<IDeliveryLocationData>>("/deliverylocations")
+        return http.get<Array<IDeliveryLocationViewData>>("/deliverylocations")
     }
 
     addDeliveryLocation(deliveryLocation: IDeliveryLocationData){

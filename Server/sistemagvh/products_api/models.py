@@ -7,6 +7,7 @@ class Product(models.Model):
     cost = models.DecimalField(max_digits=7, decimal_places=2)
     sellingPrice = models.DecimalField(max_digits=7, decimal_places=2)
     quantity = models.IntegerField()
+    providerId = models.ForeignKey('providers_api.Providers', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.description

@@ -3,8 +3,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
-
-
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
@@ -15,13 +13,14 @@ import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationD
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import ProductService from '../../Services/ProductService';
+import IProductViewData from '../../Utilities/Interfaces/IProductViewData';
 
 type Props = {}
 
 type State = {
     productDeliveryId: number,
     deliveryLocationChoosed: IDeliveryLocationData | null,
-    productChoosed: IProductData | null,
+    productChoosed: IProductViewData | null,
     expirationDate: Date | null,
     quantityDelivered: string,
     quantityReturned: string,
@@ -29,7 +28,7 @@ type State = {
     productDeliveryCreated: boolean,
     openProducts: boolean,
     openDeliveryLocations: boolean,
-    products: IProductData[],
+    products: IProductViewData[],
     deliveryLocations: IDeliveryLocationData[],
     message: IMessage,
     productDeliveryEdited: boolean,
@@ -64,8 +63,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        this.setState({ deliveryLocations })
-        this.setState({ products })
+        this.setState({ deliveryLocations, products })
 
         const { productDeliveryId } = this.state
         const productDelivery = (await ProductDeliveryService.getById(productDeliveryId)).data
@@ -124,7 +122,8 @@ export default class EditProductDelivery extends Component<Props, State> {
             this.setState({ deliveryLocationChoosed: null });
         }
     }
-    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductData | null) => {
+
+    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductViewData | null) => {
         if (value !== null) {
             this.setState({ productChoosed: value });
         } else {
@@ -286,8 +285,8 @@ export default class EditProductDelivery extends Component<Props, State> {
                                 onClose={() => {
                                     this.setState({ openProducts: false })
                                 }}
-                                isOptionEqualToValue={(option: IProductData, value: IProductData) => option.description === value.description}
-                                getOptionLabel={(option: IProductData) => option.description}
+                                isOptionEqualToValue={(option: IProductViewData, value: IProductViewData) => option.description === value.description}
+                                getOptionLabel={(option: IProductViewData) => option.description}
                                 options={products}
                                 onChange={this.handleProductChange}
                                 value={productChoosed}

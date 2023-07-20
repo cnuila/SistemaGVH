@@ -1,5 +1,6 @@
 import http from "../Utilities/AxiosObject"
 import IProductData from "../Utilities/Interfaces/IProductData"
+import IProductViewData from "../Utilities/Interfaces/IProductViewData"
 
 class ProductService {
 
@@ -8,7 +9,7 @@ class ProductService {
     }
 
     getAll(){
-        return http.get<Array<IProductData>>("/products")
+        return http.get<Array<IProductViewData>>("/products")
     }
 
     addProduct(product: IProductData){

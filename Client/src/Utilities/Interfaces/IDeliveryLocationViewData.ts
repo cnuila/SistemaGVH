@@ -2,5 +2,6 @@ export default interface IDeliveryLocationData {
     id: number | null,
     name: string, 
     address: string,
-    deliveryZoneId: number | null
+    deliveryZoneId: number | null,
+    deliveryZoneName: string
 }

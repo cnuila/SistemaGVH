@@ -5,6 +5,9 @@ import IMessage from '../../Utilities/Interfaces/IMessage'
 import NavBar from '../NavBar'
 import IProductData from '../../Utilities/Interfaces/IProductData'
 import ProductService from '../../Services/ProductService'
+import Autocomplete from '@mui/material/Autocomplete';
+import IProviderData from '../../Utilities/Interfaces/IProviderData'
+import ProviderService from '../../Services/ProviderService'
 
 type Props = {
 
@@ -18,7 +21,9 @@ type State = {
     sellingPrice: string,
     quantity: string,
     message: IMessage,
-    productEdited: boolean
+    productEdited: boolean,
+    providers: IProviderData[],
+    selectedProvider: IProviderData | null,
 }
 
 export default class EditProduct extends Component<Props, State> {
@@ -35,20 +40,23 @@ export default class EditProduct extends Component<Props, State> {
             text: "",
             type: "success"
         },
-        productEdited: false
+        productEdited: false,
+        providers: [],
+        selectedProvider: null,
     }
 
     async componentDidMount() {
         const { productId } = this.state
         const product = (await ProductService.getById(productId)).data
-        console.log(product)
-        console.log(product.code + " " + product.description + " " + product.cost + " " + product.sellingPrice + " " + product.quantity)
+        const providers = (await ProviderService.getAll()).data                    
         this.setState({
             code: product.code,
             description: product.description,
             cost: product.cost.toString(),
             sellingPrice: product.sellingPrice.toString(),
-            quantity: product.quantity.toString()
+            quantity: product.quantity.toString(),
+            providers,
+            selectedProvider: providers.find((provider) => provider.id === product.providerId) || null
         })
     }
 
@@ -80,19 +88,28 @@ export default class EditProduct extends Component<Props, State> {
         }
     }
 
+    handleProviderChange = (event: SyntheticEvent<Element, Event>, value: IProviderData | null) => {
+        if (value !== null) {
+            this.setState({ selectedProvider: value });
+        } else {
+            this.setState({ selectedProvider: null });
+        }
+    }
+
     handleOnSubmit = async (e: SyntheticEvent) => {
         e.preventDefault();
 
         if (this.validations()) {
             try {
-                const { productId, code, description, cost, sellingPrice, quantity } = this.state
+                const { productId, code, description, cost, sellingPrice, quantity, selectedProvider } = this.state
                 const productToEdit: IProductData = {
                     id: productId,
                     code,
                     description,
                     cost: +cost,
                     sellingPrice: +sellingPrice,
-                    quantity: +quantity
+                    quantity: +quantity,
+                    providerId : selectedProvider!.id
                 }
 
                 const response = await ProductService.updateProduct(productId, productToEdit)
@@ -109,7 +126,7 @@ export default class EditProduct extends Component<Props, State> {
     }
 
     validations = () => {
-        const { code, description, cost, sellingPrice, quantity } = this.state
+        const { code, description, cost, sellingPrice, quantity, selectedProvider } = this.state
         if (code === "") {
             this.prepareMessage("Debes ingresar un Código", true);
             return false
@@ -132,6 +149,11 @@ export default class EditProduct extends Component<Props, State> {
 
         if (quantity === "") {
             this.prepareMessage("Debes ingresar una Cantidad", true);
+            return false
+        }
+
+        if (selectedProvider == null) {
+            this.prepareMessage("Debes seleccionar un Proveedor", true);
             return false
         }
         return true
@@ -161,7 +183,7 @@ export default class EditProduct extends Component<Props, State> {
     };
 
     render() {
-        const { code, description, cost, sellingPrice, quantity, message, productEdited } = this.state
+        const { code, description, cost, sellingPrice, quantity, message, productEdited, providers, selectedProvider } = this.state
 
         if (productEdited) {
             return (<Navigate to={"/productos"} replace />)
@@ -198,6 +220,31 @@ export default class EditProduct extends Component<Props, State> {
 
                             <TextField id="quantity" type="text" variant="outlined" margin="normal" required fullWidth
                                 label="Cantidad" name="quantity" value={quantity} onChange={this.handleOnChange} />
+
+                            <Autocomplete
+                                id="provider"
+                                sx={{ marginTop: 2 }}
+                                isOptionEqualToValue={(option: IProviderData, value: IProviderData) => option.name === value.name}
+                                getOptionLabel={(option: IProviderData) => option.name}
+                                options={providers}
+                                onChange={this.handleProviderChange}
+                                value={selectedProvider}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Nombre del Proveedor"
+                                        required
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            endAdornment: (
+                                                <React.Fragment>
+                                                    {params.InputProps.endAdornment}
+                                                </React.Fragment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Editar</Button>
                         </Box>
