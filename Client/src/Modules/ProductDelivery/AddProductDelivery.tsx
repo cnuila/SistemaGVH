@@ -10,38 +10,38 @@ import NavBar from '../NavBar'
 
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
-import IProductData from '../../Utilities/Interfaces/IProductData'
 import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData';
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import ProductService from '../../Services/ProductService';
+import IProductViewData from '../../Utilities/Interfaces/IProductViewData';
 
 type Props = {}
 
 type State = {
     deliveryLocationChoosed: IDeliveryLocationData | null,
-    productChoosed: IProductData | null,
+    productChoosed: IProductViewData | null,
     expirationDate: Date | null,
     quantityDelivered: string,
     soldPrice: string,
+    deliveryDate: Date | null,
     message: IMessage,
     productDeliveryCreated: boolean
     openProducts: boolean,
     openDeliveryLocations: boolean,
-    products: IProductData[],
+    products: IProductViewData[],
     deliveryLocations: IDeliveryLocationData[]
 }
 
-
-
-
 export default class AddProductDelivery extends Component<Props, State>{
+
     state: State = {
         deliveryLocationChoosed: null,
         productChoosed: null,
         expirationDate: null,
         quantityDelivered: "0",
         soldPrice: "0",
+        deliveryDate: null,
         message: {
             show: false,
             text: "",
@@ -57,8 +57,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        this.setState({ deliveryLocations })
-        this.setState({ products })
+        this.setState({ deliveryLocations, products })
     }
 
     handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +81,11 @@ export default class AddProductDelivery extends Component<Props, State>{
             expirationDate: date,
         });
     }
+    handleDeliveryDateOnChange = (date: Date | null) => {
+        this.setState({
+            deliveryDate: date,
+        });
+    }
 
     handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
         if (value !== null) {
@@ -90,7 +94,7 @@ export default class AddProductDelivery extends Component<Props, State>{
             this.setState({ deliveryLocationChoosed: null });
         }
     }
-    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductData | null) => {
+    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductViewData | null) => {
         if (value !== null) {
             this.setState({ productChoosed: value });
         } else {
@@ -103,7 +107,7 @@ export default class AddProductDelivery extends Component<Props, State>{
 
         if (this.validations()) {
             try {
-                const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
+                const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate } = this.state
                 const productDeliveryToAdd: IProductDeliveryData = {
                     id: null,
                     deliveryLocationId: deliveryLocationChoosed!.id,
@@ -112,6 +116,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: null,
                     soldPrice: +soldPrice,
+                    deliveryDate: deliveryDate ? deliveryDate.toISOString().split("T")[0] : '',
                 }
                 const response = await ProductDeliveryService.addProductDelivery(productDeliveryToAdd)
                 if (response.status === 201) {
@@ -127,9 +132,8 @@ export default class AddProductDelivery extends Component<Props, State>{
         }
     }
 
-
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate } = this.state
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -148,6 +152,10 @@ export default class AddProductDelivery extends Component<Props, State>{
         }
         if (soldPrice === "" || +soldPrice === 0) {
             this.prepareMessage("Debes ingresar un Precio de Venta distinto a 0", true);
+            return false
+        }
+        if (deliveryDate === null) {
+            this.prepareMessage("Debes ingresar una fecha de entrega", true);
             return false
         }
         return true
@@ -178,7 +186,7 @@ export default class AddProductDelivery extends Component<Props, State>{
 
 
     render() {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
 
         if (productDeliveryCreated) {
             return (<Navigate to={"/entregaproducto"} replace />)
@@ -191,6 +199,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                         {message.text}
                     </Alert>
                 </Snackbar>
+
                 <NavBar />
                 <Box sx={{ height: "100vh", display: "flex" }}>
                     <Container>
@@ -217,7 +226,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 options={deliveryLocations}
                                 onChange={this.handleDeliveryLocationChange}
                                 value={deliveryLocationChoosed}
-                                // loading={loading}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -228,7 +236,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
@@ -236,6 +243,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                     />
                                 )}
                             />
+
                             <Autocomplete
                                 id="product"
                                 sx={{ marginTop: 2 }}
@@ -246,12 +254,11 @@ export default class AddProductDelivery extends Component<Props, State>{
                                 onClose={() => {
                                     this.setState({ openProducts: false })
                                 }}
-                                isOptionEqualToValue={(option: IProductData, value: IProductData) => option.description === value.description}
-                                getOptionLabel={(option: IProductData) => option.description}
+                                isOptionEqualToValue={(option: IProductViewData, value: IProductViewData) => option.description === value.description}
+                                getOptionLabel={(option: IProductViewData) => option.description}
                                 options={products}
                                 onChange={this.handleProductChange}
                                 value={productChoosed}
-                                // loading={loading}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -261,7 +268,6 @@ export default class AddProductDelivery extends Component<Props, State>{
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
@@ -283,6 +289,13 @@ export default class AddProductDelivery extends Component<Props, State>{
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
+
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
+                                <DatePicker
+                                    // @ts-expect-error
+                                    id="deliveryDate" variant="outlined" margin="normal" required fullWidth sx={{marginTop: "15px"}}
+                                    label="Fecha Entrega * (MM-DD-YYYY)" name="deliveryDate" value={deliveryDate} onChange={this.handleDeliveryDateOnChange} />
+                            </LocalizationProvider>
 
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>

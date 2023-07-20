@@ -6,5 +6,6 @@ export default interface IProductDeliveryViewData {
     quantityDelivered: number,
     quantityReturned: number | null,
     soldPrice: number,
+    deliveryDate: string, 
 }
 

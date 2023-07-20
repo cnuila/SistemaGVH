@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'users_api',
     'products_api',
     'deliverylocations_api',
-    'productdelivery_api'
+    'productdelivery_api',
+    'deliveryzones_api',
+    'providers_api'
 ]
 
 MIDDLEWARE = [

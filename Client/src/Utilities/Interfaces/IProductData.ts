@@ -5,4 +5,5 @@ export default interface IProductData {
     cost: number, 
     sellingPrice: number,
     quantity: number,
+    providerId: number | null,
 }

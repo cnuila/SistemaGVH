@@ -30,6 +30,7 @@ class ProductDeliveryListApiView(APIView):
                 'quantityDelivered',
                 'quantityReturned',
                 'soldPrice',
+                'deliveryDate'
             )
         return Response(product_delivery, status=status.HTTP_200_OK)
 
@@ -40,14 +41,12 @@ class ProductDeliveryListApiView(APIView):
             'productId': request.data.get('productId'),
             'expirationDate': request.data.get('expirationDate'),
             'quantityDelivered': request.data.get('quantityDelivered'),
-            #'quantityReturned': request.data.get('quantityReturned'),
             'quantityReturned': None,
             'soldPrice': request.data.get('soldPrice'),
+            'deliveryDate': request.data.get('deliveryDate')
         }
-        print(request.data.get('expirationDate'))
-
+        
         serializer = ProductDeliverySerializer(data=data)
-        print('serializer passed')
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -90,7 +89,9 @@ class ProductDeliveryDetailApiView(APIView):
             'expirationDate': request.data.get('expirationDate'),
             'quantityDelivered': request.data.get('quantityDelivered'),
             'quantityReturned': request.data.get('quantityReturned'),
-            'soldPrice': request.data.get('soldPrice')
+            'soldPrice': request.data.get('soldPrice'),
+            'deliveryDate': request.data.get('deliveryDate')
+
         }
         serializer = ProductDeliverySerializer(instance = prod_deliv_to_update, data=data, partial = True)
         if serializer.is_valid():
@@ -128,6 +129,7 @@ class ProductDeliveryListWithReturnsApiView(APIView):
                 'quantityDelivered',
                 'quantityReturned',
                 'soldPrice',
+                'deliveryDate'
             )
         return Response(product_delivery, status=status.HTTP_200_OK)
  

@@ -4,16 +4,16 @@ import { Navigate } from 'react-router-dom'
 import { DataGrid, GridActionsCellItem, GridColDef, GridRowId , esES} from '@mui/x-data-grid'
 import { Edit, Delete } from '@mui/icons-material'
 import NavBar from '../NavBar'
-import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import { getError } from '../../Utilities/ErrorHandler'
+import IDeliveryLocationViewData from '../../Utilities/Interfaces/IDeliveryLocationViewData'
 
 type Props = {}
 
 type State = {
-    deliveryLocations: Array<IDeliveryLocationData>,
-    columnHeaders: Array<GridColDef<IDeliveryLocationData>>,
+    deliveryLocations: Array<IDeliveryLocationViewData>,
+    columnHeaders: Array<GridColDef<IDeliveryLocationViewData>>,
     goToAnotherPage: boolean,
     goToAddress: string,
     message: IMessage
@@ -25,7 +25,8 @@ export default class DeliveryLocations extends Component<Props, State> {
         deliveryLocations: [],
         columnHeaders: [
             { field: "name", headerName: "Nombre", headerAlign: "center", align:"center", width: 150, type: "string" },
-            { field: "address", headerName: "Dirección", headerAlign: "center", align:"center", width: 150, type: "string" },            
+            { field: "address", headerName: "Dirección", headerAlign: "center", align:"center", width: 150, type: "string" },
+            { field: "deliveryZoneName", headerName: "Zona de Entrega", headerAlign: "center", align:"center", width: 150, type: "string" },
             {
                 field: "Actions", type: "actions", width: 100,
                 getActions: (params) => [

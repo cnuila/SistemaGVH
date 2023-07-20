@@ -4,16 +4,16 @@ import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, esES } from '@mui
 import { Delete, Edit } from '@mui/icons-material'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
-import IProductData from '../../Utilities/Interfaces/IProductData'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import ProductService from '../../Services/ProductService'
 import { getError } from '../../Utilities/ErrorHandler'
+import IProductViewData from '../../Utilities/Interfaces/IProductViewData'
 
 type Props = {}
 
 type State = {
-    products: Array<IProductData>,
-    columnHeaders: Array<GridColDef<IProductData>>,
+    products: Array<IProductViewData>,
+    columnHeaders: Array<GridColDef<IProductViewData>>,
     goToAnotherPage: boolean,
     goToAddress: string,
     message: IMessage
@@ -29,6 +29,7 @@ export default class Products extends Component<Props, State> {
             { field: "cost", headerName: "Costo", headerAlign: "center", align:"center", width: 150, type: "number" },
             { field: "sellingPrice", headerName: "Precio de Venta", headerAlign: "center", align:"center", width: 150, type: "number" },
             { field: "quantity", headerName: "Cantidad", headerAlign: "center", align:"center", width: 150, type: "number" },
+            { field: "providerName", headerName: "Proveedor", headerAlign: "center", align:"center", width: 150, type: "string" },
             {
                 field: "Actions", type: "actions", width: 100,
                 getActions: (params) => [

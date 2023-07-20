@@ -83,7 +83,7 @@ export default class LogIn extends Component<Props, State> {
   render() {
     const { showPassword, email, password, showError, errorMessage, userLoggedIn } = this.state
     return (
-      userLoggedIn ? <Navigate to={"/home"} replace /> :
+      userLoggedIn ? <Navigate to={"/"} replace /> :
       <Box sx={{ bgcolor: "#002366", height: "100vh", display: "flex" }}>
 
         <Snackbar open={showError} autoHideDuration={5000} onClose={this.handleOnErrorClose} anchorOrigin={{ vertical: "top", horizontal: "right" }}>

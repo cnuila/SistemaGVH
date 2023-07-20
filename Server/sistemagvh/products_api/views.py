@@ -14,7 +14,7 @@ class ProductsListApiView(APIView):
 
     # retrieve every product on the db
     def get(self, request, *args, **kwargs):
-        products = Product.objects.order_by("id")
+        products = Product.objects.order_by("id").select_related('providerId')
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -26,6 +26,7 @@ class ProductsListApiView(APIView):
             'cost': request.data.get('cost'),
             'sellingPrice': request.data.get('sellingPrice'),
             'quantity': request.data.get('quantity'),
+            'providerId': request.data.get('providerId'),
         }
         serializer = ProductSerializer(data=data)
         if serializer.is_valid():
@@ -72,8 +73,10 @@ class ProductsDetailApiView(APIView):
             'cost': request.data.get('cost'),
             'sellingPrice': request.data.get('sellingPrice'),
             'quantity': request.data.get('quantity'),
+            'providerId': request.data.get('providerId')
         }
-        serializer = ProductSerializer(instance = product_to_update, data=data, partial = True)
+        serializer = ProductSerializer(
+            instance=product_to_update, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

@@ -3,8 +3,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
-
-
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
@@ -15,21 +13,23 @@ import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationD
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
 import ProductService from '../../Services/ProductService';
+import IProductViewData from '../../Utilities/Interfaces/IProductViewData';
 
 type Props = {}
 
 type State = {
     productDeliveryId: number,
     deliveryLocationChoosed: IDeliveryLocationData | null,
-    productChoosed: IProductData | null,
+    productChoosed: IProductViewData | null,
     expirationDate: Date | null,
     quantityDelivered: string,
     quantityReturned: string,
     soldPrice: string,
+    deliveryDate: Date | null,
     productDeliveryCreated: boolean,
     openProducts: boolean,
     openDeliveryLocations: boolean,
-    products: IProductData[],
+    products: IProductViewData[],
     deliveryLocations: IDeliveryLocationData[],
     message: IMessage,
     productDeliveryEdited: boolean,
@@ -43,6 +43,7 @@ export default class EditProductDelivery extends Component<Props, State> {
         quantityDelivered: "0",
         quantityReturned: "0",
         soldPrice: "0",
+        deliveryDate: null,
         productDeliveryCreated: false,
         openProducts: false,
         openDeliveryLocations: false,
@@ -60,12 +61,15 @@ export default class EditProductDelivery extends Component<Props, State> {
         date.setDate(date.getDate() + 1);
         return date;
     }
+    remOneDay = (date: Date) => {
+        date.setDate(date.getDate() - 1);
+        return date;
+    }
 
     async componentDidMount() {
         const products = (await ProductService.getAll()).data
         const deliveryLocations = (await DeliveryLocationService.getAll()).data
-        this.setState({ deliveryLocations })
-        this.setState({ products })
+        this.setState({ deliveryLocations, products })
 
         const { productDeliveryId } = this.state
         const productDelivery = (await ProductDeliveryService.getById(productDeliveryId)).data
@@ -83,6 +87,9 @@ export default class EditProductDelivery extends Component<Props, State> {
 
         if (productDelivery.expirationDate) {
             this.setState({ expirationDate:  this.addOneDay(new Date(productDelivery.expirationDate))});
+        }
+        if (productDelivery.deliveryDate) {
+            this.setState({ deliveryDate:  this.addOneDay(new Date(productDelivery.deliveryDate))});
         }
     }
 
@@ -116,6 +123,13 @@ export default class EditProductDelivery extends Component<Props, State> {
             this.setState({ deliveryLocationChoosed: null });
         }
     }
+    handleDeliveryDateOnChange = (date: Date | null) => {
+        if (date !== null) {
+            this.setState({ deliveryDate: date });
+        } else {
+            this.setState({ deliveryLocationChoosed: null });
+        }
+    }
 
     handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
         if (value !== null) {
@@ -124,7 +138,8 @@ export default class EditProductDelivery extends Component<Props, State> {
             this.setState({ deliveryLocationChoosed: null });
         }
     }
-    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductData | null) => {
+
+    handleProductChange = (event: SyntheticEvent<Element, Event>, value: IProductViewData | null) => {
         if (value !== null) {
             this.setState({ productChoosed: value });
         } else {
@@ -137,7 +152,7 @@ export default class EditProductDelivery extends Component<Props, State> {
 
         if (this.validations()) {
             try {
-                const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice } = this.state
+                const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice , deliveryDate} = this.state
                 let qReturnedValue: number | null
                 if (quantityReturned === "") {
                     qReturnedValue = null
@@ -145,14 +160,22 @@ export default class EditProductDelivery extends Component<Props, State> {
                     qReturnedValue = +quantityReturned
                 }
 
+                const formatDate = (date: Date): string => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    const day = String(date.getDate()).padStart(2, "0");
+                    return `${year}-${month}-${day}`;
+                };
+
                 const productDeliveryToEdit: IProductDeliveryData = {
                     id: productDeliveryId,
                     deliveryLocationId: deliveryLocationChoosed!.id,
                     productId: productChoosed!.id,
-                    expirationDate: expirationDate ? expirationDate.toISOString().split("T")[0] : '',
+                    expirationDate: expirationDate ? formatDate(expirationDate) : '',
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: qReturnedValue,
                     soldPrice: +soldPrice,
+                    deliveryDate: deliveryDate ? formatDate(deliveryDate) : '',
                 }
 
                 const response = await ProductDeliveryService.updateProductDelivery(productDeliveryId, productDeliveryToEdit)
@@ -169,7 +192,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     }
 
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice ,deliveryDate} = this.state
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -188,6 +211,10 @@ export default class EditProductDelivery extends Component<Props, State> {
         }
         if (soldPrice === "" || +soldPrice === 0) {
             this.prepareMessage("Debes ingresar un Precio de Venta distinto a 0", true);
+            return false
+        }
+        if (deliveryDate === null) {
+            this.prepareMessage("Debes ingresar una fecha de expiracion", true);
             return false
         }
         return true
@@ -217,7 +244,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     };
 
     render() {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice, message, productDeliveryEdited, openDeliveryLocations, openProducts, products, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice, deliveryDate, message, productDeliveryEdited, openDeliveryLocations, openProducts, products, deliveryLocations } = this.state
 
         if (productDeliveryEdited) {
             return (<Navigate to={"/entregaproducto"} replace />)
@@ -286,8 +313,8 @@ export default class EditProductDelivery extends Component<Props, State> {
                                 onClose={() => {
                                     this.setState({ openProducts: false })
                                 }}
-                                isOptionEqualToValue={(option: IProductData, value: IProductData) => option.description === value.description}
-                                getOptionLabel={(option: IProductData) => option.description}
+                                isOptionEqualToValue={(option: IProductViewData, value: IProductViewData) => option.description === value.description}
+                                getOptionLabel={(option: IProductViewData) => option.description}
                                 options={products}
                                 onChange={this.handleProductChange}
                                 value={productChoosed}
@@ -324,6 +351,13 @@ export default class EditProductDelivery extends Component<Props, State> {
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
+                            
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
+                                <DatePicker
+                                    // @ts-expect-error
+                                    id="deliveryDate" variant="outlined" margin="normal" required fullWidth
+                                    label="Fecha Entrega * (MM-DD-YYYY)" name="deliveryDate" value={deliveryDate} sx={{marginTop: "15px"}} onChange={this.handleDeliveryDateOnChange} />
+                            </LocalizationProvider>
 
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Editar</Button>

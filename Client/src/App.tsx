@@ -16,6 +16,12 @@ import EditDeliveryLocation from './Modules/DeliveryLocations/EditDeliveryLocati
 import ProductDelivery from './Modules/ProductDelivery/ProductDelivery';
 import AddProductDelivery from './Modules/ProductDelivery/AddProductDelivery';
 import EditProductDelivery from './Modules/ProductDelivery/EditProductDelivery';
+import DeliveryZones from './Modules/DeliveryZones/DeliveryZones';
+import AddDeliveryZone from './Modules/DeliveryZones/AddDeliveryZone';
+import EditDeliveryZone from './Modules/DeliveryZones/EditDeliveryZone';
+import Providers from './Modules/Providers/Providers';
+import AddProvider from './Modules/Providers/AddProvider';
+import EditProvider from './Modules/Providers/EditProvider';
 
 function App() {
   return (
@@ -26,15 +32,27 @@ function App() {
         <Route path="register" element={<Register />} />
         <Route path='' element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path='usuarios' element={<ProtectedRoute><Users /></ProtectedRoute>} />
+
         <Route path='productos' element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path='productos/crear' element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
         <Route path='productos/:productId' element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
+
         <Route path='lugaresentrega' element={<ProtectedRoute><DeliveryLocations /></ProtectedRoute>} />
         <Route path='lugaresentrega/crear' element={<ProtectedRoute><AddDeliveryLocation /></ProtectedRoute>} />
         <Route path='lugaresentrega/:deliveryLocationId' element={<ProtectedRoute><EditDeliveryLocation /></ProtectedRoute>} />
+
+        <Route path='zonasentrega' element={<ProtectedRoute><DeliveryZones /></ProtectedRoute>} />
+        <Route path='zonasentrega/crear' element={<ProtectedRoute><AddDeliveryZone /></ProtectedRoute>} />
+        <Route path='zonasentrega/:deliveryZoneId' element={<ProtectedRoute><EditDeliveryZone /></ProtectedRoute>} />
+
         <Route path='entregaproducto' element={<ProtectedRoute><ProductDelivery /></ProtectedRoute>} />
         <Route path='entregaproducto/crear' element={<ProtectedRoute><AddProductDelivery /></ProtectedRoute>} />
         <Route path='entregaproducto/:productDeliveryId' element={<ProtectedRoute><EditProductDelivery /></ProtectedRoute>} />
+
+        <Route path='proveedores' element={<ProtectedRoute><Providers /></ProtectedRoute>} />
+        <Route path='proveedores/crear' element={<ProtectedRoute><AddProvider /></ProtectedRoute>} />
+        <Route path='proveedores/:providerId' element={<ProtectedRoute><EditProvider /></ProtectedRoute>} />
+
         <Route path="*" element={<p>No encontramos lo que buscas:(</p>} />
       </Routes>
     </AuthProvider>
