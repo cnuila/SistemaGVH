@@ -95,32 +95,32 @@ WSGI_APPLICATION = 'sistemagvh.wsgi.application'
 #     },
 # }
 
-DATABASES = {
-   "default": {
-       "ENGINE": "mssql",
-       "NAME": "GVHDb",
-       "USER": "josue",
-       "PASSWORD": "33441221",
-       "HOST": "msi-josue\\sqlexpress",
-       "PORT": "",
-       "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
-                   "extra_params": "Encrypt=no;TrustServerCertificate=yes"
-       },
-   },
-}
-
 #DATABASES = {
-#    'default':{
-#        'ENGINE':'mssql',
-#        'NAME':'GVHDb',
-#        'USER':'',                     # Keep it blank
-#        'PASSWORD':'',                 # Keep it blank
-#        'HOST':'(localdb)\LocalVincu', # "localhost" is also possible
-#        'OPTIONS': {
-#            'driver': 'ODBC Driver 17 for SQL Server',
-#        },
-#    }
+#   "default": {
+#       "ENGINE": "mssql",
+#       "NAME": "GVHDb",
+#       "USER": "josue",
+#       "PASSWORD": "33441221",
+#       "HOST": "msi-josue\\sqlexpress",
+#       "PORT": "",
+#       "OPTIONS": {"driver": "ODBC Driver 18 for SQL Server", 
+#                   "extra_params": "Encrypt=no;TrustServerCertificate=yes"
+#       },
+#   },
 #}
+
+DATABASES = {
+    'default':{
+        'ENGINE':'mssql',
+        'NAME':'GVHDb',
+        'USER':'',                     # Keep it blank
+        'PASSWORD':'',                 # Keep it blank
+        'HOST':'(localdb)\LocalVincu', # "localhost" is also possible
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+        },
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
