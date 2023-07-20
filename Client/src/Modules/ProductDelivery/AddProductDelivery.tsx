@@ -24,6 +24,7 @@ type State = {
     expirationDate: Date | null,
     quantityDelivered: string,
     soldPrice: string,
+    deliveryDate: Date | null,
     message: IMessage,
     productDeliveryCreated: boolean
     openProducts: boolean,
@@ -40,6 +41,7 @@ export default class AddProductDelivery extends Component<Props, State>{
         expirationDate: null,
         quantityDelivered: "0",
         soldPrice: "0",
+        deliveryDate: null,
         message: {
             show: false,
             text: "",
@@ -79,6 +81,11 @@ export default class AddProductDelivery extends Component<Props, State>{
             expirationDate: date,
         });
     }
+    handleDeliveryDateOnChange = (date: Date | null) => {
+        this.setState({
+            deliveryDate: date,
+        });
+    }
 
     handleDeliveryLocationChange = (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationData | null) => {
         if (value !== null) {
@@ -100,7 +107,7 @@ export default class AddProductDelivery extends Component<Props, State>{
 
         if (this.validations()) {
             try {
-                const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
+                const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate } = this.state
                 const productDeliveryToAdd: IProductDeliveryData = {
                     id: null,
                     deliveryLocationId: deliveryLocationChoosed!.id,
@@ -109,6 +116,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                     quantityDelivered: +quantityDelivered,
                     quantityReturned: null,
                     soldPrice: +soldPrice,
+                    deliveryDate: deliveryDate ? deliveryDate.toISOString().split("T")[0] : '',
                 }
                 const response = await ProductDeliveryService.addProductDelivery(productDeliveryToAdd)
                 if (response.status === 201) {
@@ -125,7 +133,7 @@ export default class AddProductDelivery extends Component<Props, State>{
     }
 
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate } = this.state
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -144,6 +152,10 @@ export default class AddProductDelivery extends Component<Props, State>{
         }
         if (soldPrice === "" || +soldPrice === 0) {
             this.prepareMessage("Debes ingresar un Precio de Venta distinto a 0", true);
+            return false
+        }
+        if (deliveryDate === null) {
+            this.prepareMessage("Debes ingresar una fecha de entrega", true);
             return false
         }
         return true
@@ -174,7 +186,7 @@ export default class AddProductDelivery extends Component<Props, State>{
 
 
     render() {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate, message, productDeliveryCreated, openProducts, openDeliveryLocations, products, deliveryLocations } = this.state
 
         if (productDeliveryCreated) {
             return (<Navigate to={"/entregaproducto"} replace />)
@@ -256,7 +268,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                     {params.InputProps.endAdornment}
+                                                    {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
                                         }}
@@ -277,6 +289,13 @@ export default class AddProductDelivery extends Component<Props, State>{
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
+
+                            <LocalizationProvider dateAdapter={AdapterDateFns} >
+                                <DatePicker
+                                    // @ts-expect-error
+                                    id="deliveryDate" variant="outlined" margin="normal" required fullWidth sx={{marginTop: "15px"}}
+                                    label="Fecha Entrega * (MM-DD-YYYY)" name="deliveryDate" value={deliveryDate} onChange={this.handleDeliveryDateOnChange} />
+                            </LocalizationProvider>
 
 
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Crear</Button>
