@@ -25,8 +25,8 @@ export default class DeliveryLocations extends Component<Props, State> {
         deliveryLocations: [],
         columnHeaders: [
             { field: "name", headerName: "Nombre", headerAlign: "center", align:"center", width: 150, type: "string" },
-            { field: "address", headerName: "Dirección", headerAlign: "center", align:"center", width: 150, type: "string" },
-            { field: "deliveryZoneName", headerName: "Zona de Entrega", headerAlign: "center", align:"center", width: 150, type: "string" },
+            { field: "address", headerName: "Dirección", headerAlign: "center", align:"center", width: 300, type: "string" },
+            { field: "deliveryZoneName", headerName: "Zona de Entrega", headerAlign: "center", align:"center", width: 250, type: "string" },
             {
                 field: "Actions", type: "actions", width: 100,
                 getActions: (params) => [
