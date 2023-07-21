@@ -25,10 +25,10 @@ export default class Products extends Component<Props, State> {
         products: [],
         columnHeaders: [
             { field: "code", headerName: "Código", headerAlign: "center", align:"center", width: 150, type: "string" },
-            { field: "description", headerName: "Descripción", headerAlign: "center", align:"center", width: 150, type: "string" },
-            { field: "cost", headerName: "Costo", headerAlign: "center", align:"center", width: 150, type: "number" },
-            { field: "sellingPrice", headerName: "Precio de Venta", headerAlign: "center", align:"center", width: 150, type: "number" },
-            { field: "quantity", headerName: "Cantidad", headerAlign: "center", align:"center", width: 150, type: "number" },
+            { field: "description", headerName: "Descripción", headerAlign: "center", align:"center", width: 300, type: "string" },
+            { field: "cost", headerName: "Costo", headerAlign: "center", align:"center", width: 100, type: "number" },
+            { field: "sellingPrice", headerName: "Precio de Venta", headerAlign: "center", align:"center", width: 100, type: "number" },
+            { field: "quantity", headerName: "Cantidad", headerAlign: "center", align:"center", width: 100, type: "number" },
             { field: "providerName", headerName: "Proveedor", headerAlign: "center", align:"center", width: 150, type: "string" },
             {
                 field: "Actions", type: "actions", width: 100,

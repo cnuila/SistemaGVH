@@ -24,7 +24,7 @@ export default class DeliveryZones extends Component<Props, State> {
     state: State = {
         deliveryZones: [],
         columnHeaders: [
-            { field: "name", headerName: "Nombre", headerAlign: "center", align: "center", width: 150, type: "string" },            
+            { field: "name", headerName: "Nombre", headerAlign: "center", align: "center", width: 300, type: "string" },            
             {
                 field: "Actions", type: "actions", width: 100,
                 getActions: (params) => [
@@ -141,7 +141,7 @@ export default class DeliveryZones extends Component<Props, State> {
                         <Box sx={{ height: 500, width: "100%", }}>
                             <DataGrid
                                 localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                                sx={{ boxShadow: 3 }}
+                                sx={{ boxShadow: 3}}
                                 columns={columnHeaders}
                                 rows={deliveryZones}
                             />
