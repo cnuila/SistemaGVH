@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { Box, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent, Typography } from '@mui/material'
+import React, { Component, SyntheticEvent } from 'react'
+import { Box, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent, Typography, Autocomplete, TextField } from '@mui/material'
 import NavBar from './NavBar'
 import "chart.js/auto";
 import {
@@ -14,6 +14,15 @@ import {
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
 import { Place } from '@mui/icons-material';
+import IMessage from '../Utilities/Interfaces/IMessage'
+import ProductService from '../Services/ProductService'
+import IProductViewData from '../Utilities/Interfaces/IProductViewData'
+import DeliveryZoneService from '../Services/DeliveryZoneService'
+import IDeliveryZoneData from '../Utilities/Interfaces/IDeliveryZoneData'
+import DeliveryLocationService from '../Services/DeliveryLocationService'
+import IDeliveryLocationViewData from '../Utilities/Interfaces/IDeliveryLocationViewData'
+import DashboardService from '../Services/DashboardService';
+import IProductsByLocationData from '../Utilities/Interfaces/IProductsByLocationData';
 
 ChartJS.register(
     CategoryScale,
@@ -56,24 +65,38 @@ type State = {
     month: string,
     product: string,
     selectedProduct: string,
-    selectedPlace: string,
+    selectedPlace: IDeliveryLocationViewData | null,
+    message: IMessage,
     verticalBarData: ChartData<"bar">,
     pieData: ChartData<"pie">,
     horizontalBarData: ChartData<"bar">,
+
+    products: Array<IProductViewData>,
+    productsByLocation: Array<IProductsByLocationData>,
+    deliveryZones: Array<IDeliveryZoneData>,
+    deliveryLocations: Array<IDeliveryLocationViewData>,
 }
 
 export default class Home extends Component<Props, State> {
+    products: Array<IProductViewData> = []
+    deliveryZones: Array<IDeliveryZoneData> = []
     labels: Array<string> = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    products: { name: string, value: number }[] = [{ name: 'Coca Cola', value: 20 }, { name: 'Sprite', value: 15 }, { name: 'Nutela', value: 10 }, { name: 'Agua', value: 5 }, { name: 'Chocolate', value: 1 }];
     places: { name: string, value: number }[] = [{ name: 'Tatumbla', value: 20 }, { name: 'Loarque', value: 15 }, { name: 'Comayagua', value: 10 }, { name: 'Catacamas', value: 5 }, { name: 'Tonelitos', value: 1 }];
-
-
     state: State = {
         year: "",
         month: "",
         product: "",
-        selectedPlace: "",
+        selectedPlace: null,
         selectedProduct: "",
+        products: [],
+        productsByLocation: [],
+        deliveryZones: [],
+        deliveryLocations: [],
+        message: {
+            show: false,
+            text: "",
+            type: "success"
+        },
         verticalBarData: {
             labels: this.labels,
             datasets: [
@@ -90,11 +113,11 @@ export default class Home extends Component<Props, State> {
             ]
         },
         pieData: {
-            labels: this.products.map(p => p.name),
+            labels: this.products.map(p => p.description),
             datasets: [
                 {
                     label: 'Cantidad',
-                    data: this.products.map(p => p.value),
+                    data: this.products.map(p => p.cost),
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',
@@ -116,7 +139,7 @@ export default class Home extends Component<Props, State> {
             ]
         },
         horizontalBarData: {
-            labels: this.places.map(p => p.name),
+            labels: this.deliveryZones.map(z => z.name),
             datasets: [
                 {
                     label: '# Ventas',
@@ -134,6 +157,71 @@ export default class Home extends Component<Props, State> {
             this.setState({ deliveryLocationChoosed: null });
         }
     }*/
+
+    async componentDidMount() {
+        const products = (await ProductService.getAll()).data
+        const deliveryZones = (await DeliveryZoneService.getAll()).data
+        const deliveryLocations = (await DeliveryLocationService.getAll()).data
+
+        console.log(deliveryLocations)
+        this.setState({
+            products,
+            deliveryZones,
+            deliveryLocations,
+            pieData: {
+                labels: products.map(p => p.description),
+                datasets: [
+                    {
+                        label: 'Cantidad',
+                        data: products.map(p => p.cost),
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                        ],
+                        borderWidth: 1,
+                    }
+                ]
+            },
+            verticalBarData: {
+                labels: this.labels,
+                datasets: [
+                    {
+                        label: 'Entregados',
+                        data: this.labels.map(() => 50),
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    },
+                    {
+                        label: 'Devueltos',
+                        data: this.labels.map(() => 20),
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    },
+                ]
+            },
+            horizontalBarData: {
+                labels: deliveryZones.map(z => z.name),
+                datasets: [
+                    {
+                        label: '# Ventas',
+                        data: this.places.map(p => p.value),
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                    }
+                ]
+            },
+        })
+    }
+
     handleYearChange = (event: SelectChangeEvent) => {
         this.setState({
             year: event.target.value
@@ -149,18 +237,68 @@ export default class Home extends Component<Props, State> {
             product: event.target.value
         })
     }
-    handlePPPChange = (event: SelectChangeEvent) => {
-        this.setState({
-            selectedPlace: event.target.value
-        })
+
+    handlePPPChange = async (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationViewData | null) => {
+        if (value !== null) {
+            this.setState({ selectedPlace: value });
+            try {
+                const response = await DashboardService.getProductsByLocation(value!.id!)
+                console.log(response.status)
+                if (response.status === 200) {
+                    const productsByLocation = response.data
+                    this.setState({
+                        pieData: {
+                            labels: productsByLocation.map(p => p.productName),
+                            datasets: [
+                                {
+                                    label: 'Cantidad',
+                                    data: productsByLocation.map(p => p.quantity),
+                                    backgroundColor: [
+                                        'rgba(255, 99, 132, 0.2)',
+                                        'rgba(54, 162, 235, 0.2)',
+                                        'rgba(255, 206, 86, 0.2)',
+                                        'rgba(75, 192, 192, 0.2)',
+                                        'rgba(153, 102, 255, 0.2)',
+                                        'rgba(255, 159, 64, 0.2)',
+                                    ],
+                                    borderColor: [
+                                        'rgba(255, 99, 132, 1)',
+                                        'rgba(54, 162, 235, 1)',
+                                        'rgba(255, 206, 86, 1)',
+                                        'rgba(75, 192, 192, 1)',
+                                        'rgba(153, 102, 255, 1)',
+                                        'rgba(255, 159, 64, 1)',
+                                    ],
+                                    borderWidth: 1,
+                                }
+                            ]
+                        },
+                    })
+                }
+            } catch (error) {
+                this.prepareMessage("Error desconocido, intenta de nuevo.", true)
+            }
+        } else {
+            this.setState({ selectedPlace: null });
+        }
     }
+
     handleEPPChange = (event: SelectChangeEvent) => {
         this.setState({
             selectedProduct: event.target.value
         })
     }
+    prepareMessage = (message: string, isError: boolean) => {
+        this.setState({
+            message: {
+                show: true,
+                text: message,
+                type: isError ? "error" : "success"
+            }
+        })
+    }
     render() {
-        const { year, month, product, verticalBarData, pieData, horizontalBarData, selectedPlace, selectedProduct } = this.state
+        const { year, month, product, verticalBarData, pieData, horizontalBarData, selectedPlace, selectedProduct, products, deliveryZones, deliveryLocations } = this.state
         return (
             <React.Fragment>
                 <NavBar />
@@ -183,15 +321,33 @@ export default class Home extends Component<Props, State> {
                                     <b>Productos Por Lugar</b>
                                 </Typography>
                                 <FormControl sx={{ m: 1, minWidth: 240 }}>
-                                    <InputLabel id="dropdown-productPP">Lugar</InputLabel>
-                                    <Select labelId="dropdown-productPP" id="dropdown-productPP" value={selectedPlace} label="Lugar" onChange={this.handlePPPChange}>
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
-                                        <MenuItem value={1}>X</MenuItem>
-                                        <MenuItem value={2}>Y</MenuItem>
-                                        <MenuItem value={3}>Z</MenuItem>
-                                    </Select>
+                                    <Autocomplete
+                                        id="location"
+                                        sx={{ marginTop: 2 }}
+                                        isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                        getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                        options={deliveryLocations}
+                                        onChange={this.handlePPPChange}
+                                        value={selectedPlace}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Lugar"
+                                                required
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <React.Fragment>
+                                                            {params.InputProps.endAdornment}
+                                                        </React.Fragment>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                    />
+
+
+
                                 </FormControl>
                                 <Box justifyContent="center" alignItems="center" sx={{ width: 240, height: 240, }}>
                                     <Pie options={pieGraphOptions} data={pieData} />
@@ -235,12 +391,11 @@ export default class Home extends Component<Props, State> {
                                 <FormControl sx={{ m: 1, minWidth: 240 }}>
                                     <InputLabel id="dropdown-ExpiryXProduct">Producto</InputLabel>
                                     <Select labelId="dropdown-ExpiryXProduct" id="dropdown-ExpiryXProduct" value={selectedProduct} label="Product" onChange={this.handleEPPChange}>
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
-                                        <MenuItem value={1}>X</MenuItem>
-                                        <MenuItem value={2}>Y</MenuItem>
-                                        <MenuItem value={3}>Z</MenuItem>
+                                        {products.map(({ description }, index) => (
+                                            <MenuItem key={index} value={index}>
+                                                {description}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                                 <Typography variant="h1" sx={{ color: "#464555", p: 3 }}>

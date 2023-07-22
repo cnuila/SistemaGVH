@@ -5,9 +5,9 @@ import { DataGrid, GridActionsCellItem, GridColDef, GridRowId , esES} from '@mui
 import { Edit, Delete } from '@mui/icons-material'
 import NavBar from '../NavBar'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
+import IDeliveryLocationViewData from '../../Utilities/Interfaces/IDeliveryLocationViewData'
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import { getError } from '../../Utilities/ErrorHandler'
-import IDeliveryLocationViewData from '../../Utilities/Interfaces/IDeliveryLocationViewData'
 
 type Props = {}
 
