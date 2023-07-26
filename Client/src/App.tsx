@@ -22,6 +22,8 @@ import EditDeliveryZone from './Modules/DeliveryZones/EditDeliveryZone';
 import Providers from './Modules/Providers/Providers';
 import AddProvider from './Modules/Providers/AddProvider';
 import EditProvider from './Modules/Providers/EditProvider';
+import Logs from './Modules/Logs';
+
 
 function App() {
   return (
@@ -32,6 +34,7 @@ function App() {
         <Route path="register" element={<Register />} />
         <Route path='' element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path='usuarios' element={<ProtectedRoute><Users /></ProtectedRoute>} />
+        <Route path='logs' element={<ProtectedRoute><Logs /></ProtectedRoute>} />
 
         <Route path='productos' element={<ProtectedRoute><Products /></ProtectedRoute>} />
         <Route path='productos/crear' element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />

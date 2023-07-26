@@ -129,6 +129,14 @@ export default class NavBar extends Component<Props, State> {
                                     </ListItemButton>
                                 </ListItem>
                             </Link>
+                            <Link to="/logs" style={{ textDecoration: 'none', color:"white" }}>
+                                <ListItem disablePadding>
+                                    <ListItemButton>
+                                        <ListItemIcon sx={{ color: "white" }}><People /></ListItemIcon>
+                                        <ListItemText primary={"Logs"} />
+                                    </ListItemButton>
+                                </ListItem>
+                            </Link>
                             <ListItem disablePadding>
                                 <ListItemButton onClick={() => this.signCurrentUserOut()}>
                                     <ListItemIcon sx={{ color: "white" }}><Logout /></ListItemIcon>

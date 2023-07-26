@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from auth_firebase.authentication import FirebaseAuthentication
-from .serializers import DashboardSerializer, DashboardDeliveriesByZoneSerializer, MonthlyProductDeliverySerializer
+from .serializers import DashboardSerializer, DashboardDeliveriesByZoneSerializer, MonthlyProductDeliverySerializer, ProductExpirySerializer
 from django.db.models import Sum, Avg, F, Count, Value, Func, IntegerField, ExpressionWrapper, When, Case, DateField
 from django.http import JsonResponse
 from deliveryzones_api.models import DeliveryZones
@@ -12,6 +12,8 @@ from deliverylocations_api.models import DeliveryLocations
 from productdelivery_api.models import ProductDelivery
 from django.db.models.functions import ExtractMonth, Coalesce,Cast
 from datetime import date, timedelta
+from django.utils import timezone
+
 
 
 
@@ -64,9 +66,27 @@ class DashboardMonthlyDeliveriesApiView(APIView):
     
 class DashboardExpiredProductsApiView(APIView):
     def get(self, request, *args, **kwargs):
-        product_deliveries = ProductDelivery.objects.filter( expirationDate__lte = date.today() + timedelta(days=18) ).annotate(
-            name=F('productId__description'),
-            remainingDays=(F('expirationDate') - date.today()),
-        ).values('id','name', 'remainingDays')
+        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
 
-        return Response(product_deliveries, status=status.HTTP_200_OK)
+        remaining_days_expression = ExpressionWrapper(
+            Func(F('expirationDate'), timezone.now(), function='DATEDIFF', template='%(function)s(day, %(expressions)s)'),
+            output_field=IntegerField()
+        )
+
+        queryset = ProductDelivery.objects.filter(
+            expirationDate__lte=timezone.now(),
+            expirationDate__gte=thirty_days_ago
+        ).annotate(
+            RemainingDays=Avg(remaining_days_expression),
+            Lugar=F('deliveryLocationId__address'),
+            Zone=F('deliveryLocationId__deliveryZoneId__name'),
+            Producto=F('productId__description')
+        ).values('id', 'Producto', 'RemainingDays', 'Lugar', 'Zone')
+
+        serializer = ProductExpirySerializer(queryset, many=True)
+
+        raw_query = str(queryset.query)
+
+        print(raw_query)
+        return Response(serializer.data)
+

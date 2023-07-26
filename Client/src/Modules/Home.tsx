@@ -1,5 +1,5 @@
 import React, { Component, SyntheticEvent } from 'react'
-import { Box, Stack, Select, FormControl, InputLabel, MenuItem, SelectChangeEvent, Typography, Autocomplete, TextField } from '@mui/material'
+import { Box, Stack, FormControl, SelectChangeEvent, Typography, Autocomplete, TextField } from '@mui/material'
 import NavBar from './NavBar'
 import "chart.js/auto";
 import {
@@ -13,23 +13,17 @@ import {
     ChartData
 } from 'chart.js';
 import { Bar, Pie } from 'react-chartjs-2';
-import { Place } from '@mui/icons-material';
 import IMessage from '../Utilities/Interfaces/IMessage'
 import ProductService from '../Services/ProductService'
 import IProductViewData from '../Utilities/Interfaces/IProductViewData'
-import DeliveryZoneService from '../Services/DeliveryZoneService'
-import IDeliveryZoneData from '../Utilities/Interfaces/IDeliveryZoneData'
 import DeliveryLocationService from '../Services/DeliveryLocationService'
 import IDeliveryLocationViewData from '../Utilities/Interfaces/IDeliveryLocationViewData'
 import DashboardService from '../Services/DashboardService';
 import IProductsByLocationData from '../Utilities/Interfaces/IProductsByLocationData';
 import ISellsByZoneData from '../Utilities/Interfaces/ISellsByZoneData';
 import Swal from 'sweetalert2'
-import { title } from 'process';
 import { DataGrid, GridColDef, esES } from '@mui/x-data-grid';
-import IMonthlyDeliveriesData from '../Utilities/Interfaces/IMonthlyDeliveriesData';
 import IExpiredProductsData from '../Utilities/Interfaces/IExpiredProductsData';
-import ILogsData from '../Utilities/Interfaces/ILogsData';
 
 ChartJS.register(
     CategoryScale,
@@ -68,11 +62,9 @@ type State = {
     verticalBarData: ChartData<"bar">,
     pieData: ChartData<"pie">,
     horizontalBarData: ChartData<"bar">,
-    columnHeadersLogs: Array<GridColDef<ILogsData>>,
     columnHeadersExpired: Array<GridColDef<IExpiredProductsData>>,
     expirationAVG: number,
     expiredProducts: Array<IExpiredProductsData>,
-    logs: Array<ILogsData>,
     products: Array<IProductViewData>,
     productsByLocation: Array<IProductsByLocationData>,
     deliveryZones: Array<ISellsByZoneData>,
@@ -85,14 +77,11 @@ export default class Home extends Component<Props, State> {
         selectedYear: new Date().getFullYear().toString(),
         month: "",
         product: "",
-        columnHeadersLogs: [
-            { field: "id", headerName: "Código", headerAlign: "center", align: "center", width: 100, type: "string" },
-            { field: "description", headerName: "Descripción", headerAlign: "center", align: "center", width: 280, type: "string" },
-            { field: "date", headerName: "Fecha", headerAlign: "center", align: "center", width: 150, type: "string" },
-        ],
         columnHeadersExpired: [
-            { field: "name", headerName: "Nombre", headerAlign: "center", align: "center", width: 150, type: "string" },
-            { field: "remainingDays", headerName: "Dias Restantes", headerAlign: "center", align: "center", width: 150, type: "number" },
+            { field: "name", headerName: "Nombre", headerAlign: "center", align: "center", width: 200, type: "string" },
+            { field: "remainingDays", headerName: "Dias Restantes", headerAlign: "center", align: "center", width: 120, type: "number" },
+            { field: "location", headerName: "Lugar", headerAlign: "center", align: "center", width: 200, type: "string" },
+            { field: "zone", headerName: "Zona", headerAlign: "center", align: "center", width: 200, type: "string" },
         ],
         selectedPlace: null,
         expirationAVG: 0,
@@ -101,7 +90,6 @@ export default class Home extends Component<Props, State> {
         productsByLocation: [],
         deliveryZones: [],
         deliveryLocations: [],
-        logs: [{ id: 1, description: "Producto Agregado", date: "7/JUL/2023" }, { id: 2, description: "Producto Editado", date: "9/JUL/2023" }, { id: 3, description: "Delivery Agregado", date: "6/AGO/2023" }, { id: 4, description: "Zona Agregada", date: "10/AGO/2023" }],
         expiredProducts: [],
         message: {
             show: false,
@@ -334,7 +322,7 @@ export default class Home extends Component<Props, State> {
         })
     }
     render() {
-        const { selectedYear, month, product, verticalBarData, pieData, horizontalBarData, selectedPlace, selectedProduct, products, deliveryLocations, expirationAVG, columnHeadersLogs, columnHeadersExpired, logs, expiredProducts } = this.state
+        const { selectedYear, month, product, verticalBarData, pieData, horizontalBarData, selectedPlace, selectedProduct, products, deliveryLocations, expirationAVG, columnHeadersExpired, expiredProducts } = this.state
         return (
             <React.Fragment>
                 <NavBar />
@@ -403,10 +391,141 @@ export default class Home extends Component<Props, State> {
                         <Box sx={{ width: 300, height: 300 }}>
                             <Stack justifyContent="center" alignItems="center">
                                 <Typography variant="h6" sx={{ color: "#464555" }}>
-                                    <b>Venta por Zona</b>
+                                    <b>Comparacion</b>
                                 </Typography>
-                                <Box justifyContent="center" alignItems="center" sx={{ width: 400, height: 400, pt: 5 }}>
-                                    <Bar options={horizontalGraphOptions} data={horizontalBarData} />
+                                <FormControl sx={{ m: 1, minWidth: 200 }}>
+                                    <Autocomplete
+                                        id="location"
+                                        sx={{ marginTop: 2 }}
+                                        isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                        getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                        options={deliveryLocations}
+                                        onChange={this.handlePPPChange}
+                                        value={selectedPlace}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Lugar"
+                                                required
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    endAdornment: (
+                                                        <React.Fragment>
+                                                            {params.InputProps.endAdornment}
+                                                        </React.Fragment>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                </FormControl>
+                                <Stack direction="row" justifyContent="center" alignItems="center" spacing={20}>
+                                    <FormControl sx={{ minWidth: 200 }}>
+                                        <Autocomplete
+                                            id="location"
+                                            isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                            getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                            options={deliveryLocations}
+                                            onChange={this.handlePPPChange}
+                                            value={selectedPlace}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Lugar"
+                                                    required
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <React.Fragment>
+                                                                {params.InputProps.endAdornment}
+                                                            </React.Fragment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </FormControl>
+                                    <FormControl sx={{ minWidth: 200 }}>
+                                        <Autocomplete
+                                            id="location"
+                                            isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                            getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                            options={deliveryLocations}
+                                            onChange={this.handlePPPChange}
+                                            value={selectedPlace}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Lugar"
+                                                    required
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <React.Fragment>
+                                                                {params.InputProps.endAdornment}
+                                                            </React.Fragment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </FormControl>
+                                </Stack>
+                                <Stack direction="row" justifyContent="center" alignItems="center" spacing={20}>
+                                    <FormControl sx={{ m: 1, minWidth: 200 }}>
+                                        <Autocomplete
+                                            id="location"
+                                            isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                            getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                            options={deliveryLocations}
+                                            onChange={this.handlePPPChange}
+                                            value={selectedPlace}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Lugar"
+                                                    required
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <React.Fragment>
+                                                                {params.InputProps.endAdornment}
+                                                            </React.Fragment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </FormControl>
+                                    <FormControl sx={{ m: 1, minWidth: 200 }}>
+                                        <Autocomplete
+                                            id="location"
+                                            isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                            getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                            options={deliveryLocations}
+                                            onChange={this.handlePPPChange}
+                                            value={selectedPlace}
+                                            renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    label="Lugar"
+                                                    required
+                                                    InputProps={{
+                                                        ...params.InputProps,
+                                                        endAdornment: (
+                                                            <React.Fragment>
+                                                                {params.InputProps.endAdornment}
+                                                            </React.Fragment>
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        />
+                                    </FormControl>
+                                </Stack>
+
+                                <Box justifyContent="center" alignItems="center" sx={{ width: 240, height: 240, }}>
+                                    <Pie options={pieGraphOptions} data={pieData} />
                                 </Box>
                             </Stack>
                         </Box>
@@ -506,25 +625,12 @@ export default class Home extends Component<Props, State> {
                                 </Stack>
                                 <Bar options={verticalGraphOptions} data={verticalBarData} />
                             </Box>
-                            <Stack justifyContent="center" alignItems="center" spacing={5}>
-                                <Typography variant="h6" sx={{ color: "#464555", mt: 5 }}>
-                                    <b>Historial de Logs</b>
-                                </Typography>
-                                <Box sx={{ height: 500, width: 535, pb: 3 }}>
-                                    <DataGrid
-                                        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                                        sx={{ boxShadow: 3 }}
-                                        columns={columnHeadersLogs}
-                                        rows={logs}
-                                    />
-                                </Box>
-                            </Stack>
 
                             <Stack justifyContent="center" alignItems="center" spacing={5}>
                                 <Typography variant="h6" sx={{ color: "#464555", mt: 5 }}>
                                     <b>Productos Por Vencer</b>
                                 </Typography>
-                                <Box sx={{ height: 500, width: 302, pb: 3 }}>
+                                <Box sx={{ height: 510, width: '103%', pb: 3 }}>
                                     <DataGrid
                                         localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                                         sx={{ boxShadow: 3 }}

@@ -22,3 +22,8 @@ class MonthlyProductDeliverySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductDelivery
         fields = ('month', 'totalDelivered', 'totalReturned')
+
+class ProductExpirySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductDelivery
+        fields = ['id', 'Producto', 'RemainingDays', 'Lugar', 'Zone']
