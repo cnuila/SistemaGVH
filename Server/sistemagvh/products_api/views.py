@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from auth_firebase.authentication import FirebaseAuthentication
 from .models import Product
 from .serializers import ProductSerializer
+from logs_api.logs_logic import addLog 
+
 
 # methods under /products
 class ProductsListApiView(APIView):
@@ -29,8 +31,10 @@ class ProductsListApiView(APIView):
             'providerId': request.data.get('providerId'),
         }
         serializer = ProductSerializer(data=data)
+
         if serializer.is_valid():
-            serializer.save()
+            product = serializer.save()
+            addLog(request=request, description=f"Producto {product.description} Agregado", user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -78,7 +82,8 @@ class ProductsDetailApiView(APIView):
         serializer = ProductSerializer(
             instance=product_to_update, data=data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            product = serializer.save()
+            addLog(request=request, description=f"Producto {product.description} Editado", user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,6 +97,8 @@ class ProductsDetailApiView(APIView):
             )
 
         product_to_delete.delete()
+        addLog(request=request, description=f"Producto {product_to_delete.description} Eliminado", user=request.user)
+
         return Response(
             {"res": "Producto eliminado."},
             status=status.HTTP_200_OK

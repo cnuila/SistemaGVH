@@ -2,20 +2,15 @@ import http from "../Utilities/AxiosObject"
 import IExpiredProductsData from "../Utilities/Interfaces/IExpiredProductsData"
 import IMonthlyDeliveriesData from "../Utilities/Interfaces/IMonthlyDeliveriesData"
 import IProductsByLocationData from "../Utilities/Interfaces/IProductsByLocationData"
-import ISellsByZoneData from "../Utilities/Interfaces/ISellsByZoneData"
-
+import IExpiryPerProductsData from "../Utilities/Interfaces/IExpiryPerProductData"
 class DashboardService {
 
-    getProductsByLocation(locationId: number) {
-        return http.get<Array<IProductsByLocationData>>(`/dashboard/PPL/${locationId}`)
+    getProductsByLocation(locationId: number, month: number, year: string) {
+        return http.get<Array<IProductsByLocationData>>(`/dashboard/PPL/${locationId}/${month}/${year}`)
     }
 
     getExpirationByProduct(productId: number) {
-        return http.get<number>(`/dashboard/EPP/${productId}`)
-    }
-
-    getSellsByZone() {
-        return http.get<Array<ISellsByZoneData>>('/dashboard/SBZ')
+        return http.get<IExpiryPerProductsData>(`/dashboard/EPP/${productId}`)
     }
 
     getMonthlyDeliveries(year: string) {
