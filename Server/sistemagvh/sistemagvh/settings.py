@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'productdelivery_api',
     'deliveryzones_api',
     'providers_api',
-    'dashboard_api'
+    'dashboard_api',
+    'logs_api'
 ]
 
 MIDDLEWARE = [

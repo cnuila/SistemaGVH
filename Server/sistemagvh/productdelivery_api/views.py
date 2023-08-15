@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from logs_api.logs_logic import addLog
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,7 +20,6 @@ class ProductDeliveryListApiView(APIView):
     authentication_classes = [FirebaseAuthentication]
 
     def get(self, request, *args, **kwargs):
-        one_day_ago = timezone.now() - timedelta(days=1)
         product_delivery = ProductDelivery.objects.order_by('expirationDate').select_related(
                 'deliveryLocationId', 'productId'
             ).values(
@@ -49,6 +49,7 @@ class ProductDeliveryListApiView(APIView):
         serializer = ProductDeliverySerializer(data=data)
         if serializer.is_valid():
             serializer.save()
+            addLog(request=request, description="Delivery Creado", user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -96,6 +97,7 @@ class ProductDeliveryDetailApiView(APIView):
         serializer = ProductDeliverySerializer(instance = prod_deliv_to_update, data=data, partial = True)
         if serializer.is_valid():
             serializer.save()
+            addLog(request=request, description="Delivery Editado", user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -109,6 +111,7 @@ class ProductDeliveryDetailApiView(APIView):
             )
 
         prod_deliv_to_delete.delete()
+        addLog(request=request, description="Delivery Eliminado", user=request.user)
         return Response(
             {"res": "Product Delivery eliminado."},
             status=status.HTTP_200_OK

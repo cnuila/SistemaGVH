@@ -22,6 +22,7 @@ from productdelivery_api import urls as product_delivery_urls
 from deliveryzones_api import urls as delivery_zones_urls
 from providers_api import urls as providers_urls
 from dashboard_api import urls as dashboard_urls
+from logs_api import urls as logs_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,4 +33,5 @@ urlpatterns = [
     path('api/', include(delivery_zones_urls)),
     path('api/', include(providers_urls)),
     path('api/', include(dashboard_urls)),
+    path('api/', include(logs_urls)),
 ]

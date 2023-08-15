@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from auth_firebase.authentication import FirebaseAuthentication
 from .models import DeliveryLocations
 from .serializers import DeliveryLocationsSerializer
+from logs_api.logs_logic import addLog
+
 
 # methods under /deliverylocations
 class DeliveryLocationsListApiView(APIView):
@@ -27,7 +29,8 @@ class DeliveryLocationsListApiView(APIView):
         }
         serializer = DeliveryLocationsSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            loc = serializer.save()
+            addLog(request=request, description=f"Lugar {loc.name} Agregado", user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -71,7 +74,8 @@ class DeliveryLocationsDetailApiView(APIView):
         }
         serializer = DeliveryLocationsSerializer(instance = d_location_to_update, data=data, partial = True)
         if serializer.is_valid():
-            serializer.save()
+            loc = serializer.save()
+            addLog(request=request, description=f"Lugar {loc.name} Editado", user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -85,6 +89,7 @@ class DeliveryLocationsDetailApiView(APIView):
             )
 
         d_location_to_delete.delete()
+        addLog(request=request, description=f"Lugar {d_location_to_delete.name} Eliminado", user=request.user)
         return Response(
             {"res": "Lugar de Entrega eliminado."},
             status=status.HTTP_200_OK

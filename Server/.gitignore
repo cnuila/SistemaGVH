@@ -4,6 +4,7 @@
 /django_env
 /.pnp
 .pnp.js
+/__pycache__
 
 # testing
 /coverage

@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from auth_firebase.authentication import FirebaseAuthentication
 from .models import Providers
 from .serializers import ProvidersSerializer
+from logs_api.logs_logic import addLog
+
 
 # methods under /providers
 class ProvidersListApiView(APIView):
@@ -25,7 +27,8 @@ class ProvidersListApiView(APIView):
         }
         serializer = ProvidersSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            provider = serializer.save()
+            addLog(request=request, description=f"Proveedor {provider.name} Agregado", user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -67,7 +70,8 @@ class ProvidersDetailApiView(APIView):
         }
         serializer = ProvidersSerializer(instance = provider_to_update, data=data, partial = True)
         if serializer.is_valid():
-            serializer.save()
+            provider = serializer.save()
+            addLog(request=request, description=f"Proveedor {provider.name} Editado", user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,6 +85,8 @@ class ProvidersDetailApiView(APIView):
             )
 
         provider_to_delete.delete()
+        addLog(request=request, description=f"Proveedor {provider_to_delete.name} Eliminado", user=request.user)
+
         return Response(
             {"res": "Proveedor eliminado."},
             status=status.HTTP_200_OK

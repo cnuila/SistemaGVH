@@ -60,7 +60,8 @@ if __name__ == "__main__":
     delivery_locations_csv = "deliveryLocations.csv"
     products_csv = "products.csv"
 
-    # Database connection parameters
+    #Database connection parameters
+
     # conn = pyodbc.connect(
     #     "Driver={ODBC Driver 18 for SQL Server};"
     #     "Server=msi-josue\\sqlexpress;"
@@ -71,16 +72,26 @@ if __name__ == "__main__":
     #     "TrustServerCertificate=yes;"
     # )
     
+    #conn = pyodbc.connect(
+    #    "Driver={ODBC Driver 18 for SQL Server};"
+    #    "Server=localhost;"
+    #    "Database=GVHDb;"
+    #    "UID=sa;"
+    #    "PWD=Password#123;"
+    #    "Encrypt=no;"
+    #    "TrustServerCertificate=yes;"
+    #)
+
     conn = pyodbc.connect(
-        "Driver={ODBC Driver 18 for SQL Server};"
-        "Server=localhost;"
+        "Driver={ODBC Driver 17 for SQL Server};"
+        "Server=(localdb)\LocalVincu;"
         "Database=GVHDb;"
-        "UID=sa;"
-        "PWD=Password#123;"
+        "UID=;"
+        "PWD=;"
         "Encrypt=no;"
         "TrustServerCertificate=yes;"
     )
-    
+
     import_delivery_locations_from_csv(delivery_locations_csv, conn)
     import_products_from_csv(products_csv, conn)
 

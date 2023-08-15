@@ -1,7 +1,7 @@
 export default interface IExpiredProductsData {
     id: number,
-    name: string,
+    productName: string,
     remainingDays: number,
-    location: string,
-    zone: string,
+    deliveryLocation: string,
+    deliveryZone: string,
 }

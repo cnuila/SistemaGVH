@@ -1,14 +1,9 @@
 import React, { Component } from 'react'
-import { Alert, Box, Button, Container, Snackbar, Typography } from '@mui/material'
-import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, esES } from '@mui/x-data-grid'
-import { Delete, Edit } from '@mui/icons-material'
-import { Navigate } from 'react-router-dom'
+import { Box, Container, Typography } from '@mui/material'
+import { DataGrid, GridColDef, esES } from '@mui/x-data-grid'
 import NavBar from './NavBar'
-import IMessage from '../Utilities/Interfaces/IMessage'
-import ProductService from '../Services/ProductService'
-import { getError } from '../Utilities/ErrorHandler'
-import IProductViewData from '../Utilities/Interfaces/IProductViewData'
 import ILogsData from '../Utilities/Interfaces/ILogsData'
+import LogsService from '../Services/LogsService'
 
 type Props = {}
 
@@ -24,13 +19,14 @@ export default class Logs extends Component<Props, State> {
         { field: "description", headerName: "Descripción", headerAlign: "center", align: "center", width: 600, type: "string" },
         { field: "date", headerName: "Fecha", headerAlign: "center", align: "center", width: 250, type: "string" },
         ],
-        logs: [{ id: 1, description: "Producto Agregado", date: "7/JUL/2023" },
-        { id: 2, description: "Producto Editado", date: "9/JUL/2023" },
-        { id: 3, description: "Delivery Agregado", date: "6/AGO/2023" },
-        { id: 4, description: "Zona Agregada", date: "10/AGO/2023" }
-        ],
+        logs: [],
     }
-
+    async componentDidMount() {
+        const logs = (await LogsService.getLogs()).data
+        this.setState({
+            logs
+        })
+    }
     render() {
         const { columnHeaders, logs } = this.state
 

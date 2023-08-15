@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from auth_firebase.authentication import FirebaseAuthentication
 from .models import DeliveryZones
 from .serializers import DeliveryZonesSerializer
+from logs_api.logs_logic import addLog
+
 
 # methods under /deliveryzones
 class DeliveryZonesListApiView(APIView):
@@ -25,7 +27,8 @@ class DeliveryZonesListApiView(APIView):
         }
         serializer = DeliveryZonesSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            zone = serializer.save()
+            addLog(request=request, description=f"Zona {zone.name} Agregada", user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -67,7 +70,8 @@ class DeliveryZonesDetailApiView(APIView):
         }
         serializer = DeliveryZonesSerializer(instance = d_zone_to_update, data=data, partial = True)
         if serializer.is_valid():
-            serializer.save()
+            zone = serializer.save()
+            addLog(request=request, description=f"Zona {zone.name} Editada", user=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,6 +85,7 @@ class DeliveryZonesDetailApiView(APIView):
             )
 
         d_zone_to_delete.delete()
+        addLog(request=request, description=f"Zona {d_zone_to_delete.name} Eliminada", user=request.user)
         return Response(
             {"res": "Zona de Entrega eliminada."},
             status=status.HTTP_200_OK
