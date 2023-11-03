@@ -81,6 +81,14 @@ export default class NavBar extends Component<Props, State> {
                                     </ListItemButton>
                                 </ListItem>
                             </Link>
+                            <Link to="/entregaproducto" style={{ textDecoration: 'none', color:"white" }}>
+                                <ListItem disablePadding>
+                                    <ListItemButton>
+                                        <ListItemIcon sx={{ color: "white" }}><LocalShipping /></ListItemIcon>
+                                        <ListItemText primary={"Entregas de Productos"} />
+                                    </ListItemButton>
+                                </ListItem>
+                            </Link>
                             <Link to="/productos" style={{ textDecoration: 'none', color:"white" }}>
                                 <ListItem disablePadding>
                                     <ListItemButton>
@@ -96,15 +104,7 @@ export default class NavBar extends Component<Props, State> {
                                         <ListItemText primary={"Lugares de Entrega"} />
                                     </ListItemButton>
                                 </ListItem>
-                            </Link>
-                            <Link to="/entregaproducto" style={{ textDecoration: 'none', color:"white" }}>
-                                <ListItem disablePadding>
-                                    <ListItemButton>
-                                        <ListItemIcon sx={{ color: "white" }}><LocalShipping /></ListItemIcon>
-                                        <ListItemText primary={"Entregas de Productos"} />
-                                    </ListItemButton>
-                                </ListItem>
-                            </Link>
+                            </Link>                            
                             <Link to="/zonasentrega" style={{ textDecoration: 'none', color:"white" }}>
                                 <ListItem disablePadding>
                                     <ListItemButton>

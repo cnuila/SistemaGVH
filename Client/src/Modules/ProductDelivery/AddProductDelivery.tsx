@@ -41,7 +41,7 @@ export default class AddProductDelivery extends Component<Props, State>{
         expirationDate: null,
         quantityDelivered: "0",
         soldPrice: "0",
-        deliveryDate: null,
+        deliveryDate: new Date(),
         message: {
             show: false,
             text: "",
@@ -117,6 +117,7 @@ export default class AddProductDelivery extends Component<Props, State>{
                     quantityReturned: null,
                     soldPrice: +soldPrice,
                     deliveryDate: deliveryDate ? deliveryDate.toISOString().split("T")[0] : '',
+                    observations: null
                 }
                 const response = await ProductDeliveryService.addProductDelivery(productDeliveryToAdd)
                 if (response.status === 201) {

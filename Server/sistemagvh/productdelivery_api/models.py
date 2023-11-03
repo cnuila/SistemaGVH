@@ -10,6 +10,7 @@ class ProductDelivery(models.Model):
     quantityReturned = models.IntegerField(blank=True, null=True)
     soldPrice = models.DecimalField(max_digits=7, decimal_places=2)
     deliveryDate = models.DateField()
+    observations = models.CharField(max_length=250, blank=True, null=True)
 
     def __str__(self):
         return self.deliveryLocationId.name + " " + self.productId.description + " " + str(self.expirationDate) + " " + str(self.quantityDelivered) + " " + str(self.quantityReturned) + " " + str(self.soldPrice)

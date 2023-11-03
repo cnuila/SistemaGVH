@@ -7,5 +7,6 @@ export default interface IProductDeliveryData {
     quantityReturned: number | null,
     soldPrice: number,
     deliveryDate: string, 
+    observations: string | null
 }
 

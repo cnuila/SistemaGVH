@@ -34,6 +34,7 @@ export default class ProductDelivery extends Component<Props, State>{
             { field: "quantityReturned", headerName: "Cantidad Devuelta", headerAlign: "center", align: "center", width: 150, type: "number" },
             { field: "soldPrice", headerName: "Precio Vendido", headerAlign: "center", align: "center", width: 150, type: "number" },
             { field: "deliveryDate", headerName: "Fecha de Entrega", headerAlign: "center", align: "center", width: 150, type: "string" },
+            { field: "observations", headerName: "Observaciones", headerAlign: "center", align: "center", width: 150, type: "string" },
             {
                 field: "Actions", type: "actions", width: 100,
                 getActions: (params) => [

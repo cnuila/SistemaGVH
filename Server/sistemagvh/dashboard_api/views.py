@@ -66,19 +66,25 @@ class DashboardAvgMonthlyDeliveredApiView(APIView):
     
 class DashboardExpiredProductsApiView(APIView):
     def get(self, request, *args, **kwargs):
-        thirty_days_ago = timezone.now() - timezone.timedelta(days=30)
 
         remaining_days_expression = ExpressionWrapper(
-            Func(F('expirationDate'), timezone.now(), function='DATEDIFF', template='%(function)s(day, %(expressions)s)'),
+            Func(
+                timezone.now(),
+                F('expirationDate'), 
+                function='DATEDIFF', 
+                template='%(function)s(day, %(expressions)s)'),
             output_field=IntegerField()
         )
 
+        thirty_days_future = timezone.now() + timezone.timedelta(days=30)
+
         queryset = ProductDelivery.objects.filter(
-            expirationDate__lte=timezone.now(),
-            expirationDate__gte=thirty_days_ago
+            expirationDate__lte=thirty_days_future,
+            observations__isnull=True,
+            quantityReturned__isnull=True            
         ).annotate(
             remainingDays=Avg(remaining_days_expression),
-            deliveryLocation=F('deliveryLocationId__address'),
+            deliveryLocation=F('deliveryLocationId__name'),
             deliveryZone=F('deliveryLocationId__deliveryZoneId__name'),
             productName=F('productId__description')
         ).values('id', 'productName', 'remainingDays', 'deliveryLocation', 'deliveryZone')

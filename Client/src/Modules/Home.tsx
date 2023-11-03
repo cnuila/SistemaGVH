@@ -1,5 +1,8 @@
 import React, { Component, SyntheticEvent } from 'react'
-import { Box, Stack, FormControl, Typography, Autocomplete, TextField } from '@mui/material'
+import { Box, Stack, FormControl, Typography, Autocomplete, TextField, Container } from '@mui/material'
+import { DataGrid, GridActionsCellItem, GridColDef, GridRowId, esES } from '@mui/x-data-grid';
+import { Edit } from '@mui/icons-material';
+import { Navigate } from 'react-router-dom'
 import NavBar from './NavBar'
 import "chart.js/auto";
 import {
@@ -20,8 +23,6 @@ import DeliveryLocationService from '../Services/DeliveryLocationService'
 import IDeliveryLocationViewData from '../Utilities/Interfaces/IDeliveryLocationViewData'
 import DashboardService from '../Services/DashboardService';
 import IProductsByLocationData from '../Utilities/Interfaces/IProductsByLocationData';
-import Swal from 'sweetalert2'
-import { DataGrid, GridColDef, esES } from '@mui/x-data-grid';
 import IExpiredProductsData from '../Utilities/Interfaces/IExpiredProductsData';
 import IAvgMonthlyDeliveredData from '../Utilities/Interfaces/IAvgMonthlyDeliveredData';
 
@@ -68,19 +69,21 @@ type State = {
     horizontalBarData: ChartData<"bar">,
     columnHeadersExpired: Array<GridColDef<IExpiredProductsData>>,
     columnHeadersAvgDelivered: Array<GridColDef<IAvgMonthlyDeliveredData>>,
-    avgProductsDeliveredByLocation : Array<IAvgMonthlyDeliveredData>,
+    avgProductsDeliveredByLocation: Array<IAvgMonthlyDeliveredData>,
     expirationAVG: number,
     expiredProducts: Array<IExpiredProductsData>,
     products: Array<IProductViewData>,
     productsByLocation: Array<IProductsByLocationData>,
     deliveryLocations: Array<IDeliveryLocationViewData>,
     pieDataComparison: ChartData<"pie">,
+    goToAnotherPage: boolean,
+    goToAddress: string,
 }
 
 export default class Home extends Component<Props, State> {
-    
+
     months: Array<string> = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
+
     state: State = {
         selectedComparisonLocation: null,
         selectedComparisonMonth1: null,
@@ -94,6 +97,16 @@ export default class Home extends Component<Props, State> {
             { field: "remainingDays", headerName: "Dias Restantes", headerAlign: "center", align: "center", width: 120, type: "number" },
             { field: "deliveryLocation", headerName: "Lugar", headerAlign: "center", align: "center", width: 200, type: "string" },
             { field: "deliveryZone", headerName: "Zona", headerAlign: "center", align: "center", width: 200, type: "string" },
+            {
+                field: "Actions", type: "actions", width: 100,
+                getActions: (params) => [
+                    <GridActionsCellItem
+                        icon={<Edit sx={{ color: "#464555" }} />}
+                        label="Edit"
+                        onClick={() => this.editProductDeliveryClicked(params.id)}
+                    />,
+                ]
+            }
         ],
         columnHeadersAvgDelivered: [
             { field: "productDescription", headerName: "Nombre", headerAlign: "center", align: "center", width: 200, type: "string" },
@@ -147,7 +160,9 @@ export default class Home extends Component<Props, State> {
                     backgroundColor: 'rgba(53, 162, 235, 0.5)',
                 }
             ]
-        }
+        },
+        goToAnotherPage: false,
+        goToAddress: "",
     }
 
     async componentDidMount() {
@@ -181,6 +196,13 @@ export default class Home extends Component<Props, State> {
         }
     }
 
+    editProductDeliveryClicked = (productDeliveryId: GridRowId) => {
+        this.setState({
+            goToAnotherPage: true,
+            goToAddress: `/entregaproducto/${productDeliveryId}`
+        })
+    }
+
     handlePPPChange = async (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationViewData | null) => {
         if (value !== null) {
             this.setState({ selectedPlace: value });
@@ -192,11 +214,11 @@ export default class Home extends Component<Props, State> {
     handleLocationForMonthAvgChange = async (event: SyntheticEvent<Element, Event>, value: IDeliveryLocationViewData | null) => {
         if (value !== null) {
             const avgMonthlyProducts = (await DashboardService.getMonthlyDeliveries(value.id!)).data
-            this.setState({ 
+            this.setState({
                 selectedLocationForMonthAvg: value,
                 avgProductsDeliveredByLocation: avgMonthlyProducts
             });
-            
+
         } else {
             this.setState({ selectedLocationForMonthAvg: null, avgProductsDeliveredByLocation: [] });
         }
@@ -378,14 +400,19 @@ export default class Home extends Component<Props, State> {
     }
 
     render() {
-        const { pieData, selectedPlace, selectedProduct, products, deliveryLocations, expirationAVG, pieDataComparison, columnHeadersExpired, expiredProducts, selectedComparisonMonth1, selectedComparisonMonth2, selectedComparisonYear1, selectedComparisonYear2, avgProductsDeliveredByLocation, columnHeadersAvgDelivered, selectedLocationForMonthAvg } = this.state
+        const { pieData, selectedPlace, selectedProduct, products, deliveryLocations, expirationAVG, pieDataComparison, columnHeadersExpired, expiredProducts, selectedComparisonMonth1, selectedComparisonMonth2, selectedComparisonYear1, selectedComparisonYear2, avgProductsDeliveredByLocation, columnHeadersAvgDelivered, selectedLocationForMonthAvg, goToAddress, goToAnotherPage } = this.state
+
+        if (goToAnotherPage) {
+            return (<Navigate to={goToAddress} replace />)
+        }
+
         return (
             <React.Fragment>
                 <NavBar />
-                <Box>
-                    <Stack direction="row" justifyContent="center" alignItems="center" spacing={5} sx={{ py: 5, px:2 }}>
+                <Box sx={{ height: "100vh", display: "flex" }}>
+                    <Container>
 
-                        <Box sx={{ width: 750, height: 500 }}>
+                        <Stack direction={'row'} sx={{ mt:3}}>
                             <Stack justifyContent="center" alignItems='flex-start'>
 
                                 <Typography variant="h6" sx={{ color: "#464555", ml: 2 }}>
@@ -529,9 +556,7 @@ export default class Home extends Component<Props, State> {
                                     </Box>
                                 </Stack>
                             </Stack>
-                        </Box>
 
-                        <Box sx={{ width: 450, height: 500 }}>
                             <Stack justifyContent="center" alignItems="center">
                                 <Typography variant="h6" sx={{ color: "#464555", ml: 10 }}>
                                     <b>Tiempo de Caducidad por Producto</b>
@@ -568,72 +593,73 @@ export default class Home extends Component<Props, State> {
                                 </Box>
 
                             </Stack>
-                        </Box>
+                        </Stack>
+                        
+                        <br/>
+                        <br/>
+                        <Box>
+                            <Stack direction="row" justifyContent="center" alignItems="center" spacing={5}>
 
-                    </Stack >
+                                <Box justifyContent="center" alignItems="center" >
+                                    <Stack justifyContent="center" alignItems='flex-start'>
+                                        <Typography variant="h6" sx={{ color: "#464555"}}>
+                                            <b>Productos Por Lugar Últimos 3 meses</b>
+                                        </Typography>
+                                        <FormControl sx={{ m: 1, minWidth: 320, }}>
+                                            <Autocomplete
+                                                id="location"
+                                                isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
+                                                getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
+                                                options={deliveryLocations}
+                                                onChange={this.handleLocationForMonthAvgChange}
+                                                value={selectedLocationForMonthAvg}
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Lugar"
+                                                        required
+                                                        InputProps={{
+                                                            ...params.InputProps,
+                                                            endAdornment: (
+                                                                <React.Fragment>
+                                                                    {params.InputProps.endAdornment}
+                                                                </React.Fragment>
+                                                            ),
+                                                        }}
+                                                    />
+                                                )}
+                                            />
+                                        </FormControl>
+                                        <Box sx={{ height: 510, width: '103%', pb: 3 }}>
+                                            <DataGrid
+                                                localeText={esES.components.MuiDataGrid.defaultProps.localeText}
+                                                sx={{ boxShadow: 3 }}
+                                                columns={columnHeadersAvgDelivered}
+                                                rows={avgProductsDeliveredByLocation}
+                                            />
+                                        </Box>
+                                    </Stack>
+                                </Box>
 
-                    <Box sx={{my:-10}}>
-                        <Stack direction="row" justifyContent="center" alignItems="center" spacing={5}>
-
-                            <Box justifyContent="center" alignItems="center" sx={{ width: 900, height: 500, pl:2 }}>
-                                <Stack justifyContent="center" alignItems='flex-start'>
-                                    <Typography variant="h6" sx={{ color: "#464555"}}>
-                                        <b>Productos Por Lugar Últimos 3 meses</b>
+                                <Stack justifyContent="center" alignItems="center" spacing={5}>
+                                    <Typography variant="h6" sx={{ color: "#464555" }}>
+                                        <b>Productos Por Vencer</b>
                                     </Typography>
-                                    <FormControl sx={{ m: 1, minWidth: 320, }}>
-                                        <Autocomplete
-                                            id="location"
-                                            isOptionEqualToValue={(option: IDeliveryLocationViewData, value: IDeliveryLocationViewData) => option.name === value.name}
-                                            getOptionLabel={(option: IDeliveryLocationViewData) => option.name}
-                                            options={deliveryLocations}
-                                            onChange={this.handleLocationForMonthAvgChange}
-                                            value={selectedLocationForMonthAvg}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Lugar"
-                                                    required
-                                                    InputProps={{
-                                                        ...params.InputProps,
-                                                        endAdornment: (
-                                                            <React.Fragment>
-                                                                {params.InputProps.endAdornment}
-                                                            </React.Fragment>
-                                                        ),
-                                                    }}
-                                                />
-                                            )}
-                                        />
-                                    </FormControl>
                                     <Box sx={{ height: 510, width: '103%', pb: 3 }}>
                                         <DataGrid
                                             localeText={esES.components.MuiDataGrid.defaultProps.localeText}
                                             sx={{ boxShadow: 3 }}
-                                            columns={columnHeadersAvgDelivered}
-                                            rows={avgProductsDeliveredByLocation}
+                                            columns={columnHeadersExpired}
+                                            rows={expiredProducts}
                                         />
                                     </Box>
                                 </Stack>
-                            </Box>
 
-                            <Stack justifyContent="center" alignItems="center" spacing={5}>
-                                <Typography variant="h6" sx={{ color: "#464555", mt: 5 }}>
-                                    <b>Productos Por Vencer</b>
-                                </Typography>
-                                <Box sx={{ height: 510, width: '103%', pb: 3 }}>
-                                    <DataGrid
-                                        localeText={esES.components.MuiDataGrid.defaultProps.localeText}
-                                        sx={{ boxShadow: 3 }}
-                                        columns={columnHeadersExpired}
-                                        rows={expiredProducts}
-                                    />
-                                </Box>
                             </Stack>
+                        </Box>
 
-                        </Stack>
-                    </Box>
-
-                </Box >
+                    </Container>
+                </Box>
             </React.Fragment >
         )
     }

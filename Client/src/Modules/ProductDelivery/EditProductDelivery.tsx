@@ -3,12 +3,13 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Autocomplete from '@mui/material/Autocomplete';
+
 import React, { Component, SyntheticEvent } from 'react'
 import { Navigate } from 'react-router-dom'
 import NavBar from '../NavBar'
+
 import IMessage from '../../Utilities/Interfaces/IMessage'
 import IProductDeliveryData from '../../Utilities/Interfaces/IProductDeliveryData'
-import IProductData from '../../Utilities/Interfaces/IProductData'
 import IDeliveryLocationData from '../../Utilities/Interfaces/IDeliveryLocationData';
 import ProductDeliveryService from '../../Services/ProductDeliveryService'
 import DeliveryLocationService from '../../Services/DeliveryLocationService'
@@ -33,8 +34,11 @@ type State = {
     deliveryLocations: IDeliveryLocationData[],
     message: IMessage,
     productDeliveryEdited: boolean,
+    observations: string | null
 }
+
 export default class EditProductDelivery extends Component<Props, State> {
+
     state: State = {
         productDeliveryId: +document.location.pathname.split("/")[2],
         deliveryLocationChoosed: null,
@@ -54,7 +58,8 @@ export default class EditProductDelivery extends Component<Props, State> {
             text: "",
             type: "success"
         },
-        productDeliveryEdited: false
+        productDeliveryEdited: false,
+        observations: ""
     }
 
     addOneDay = (date: Date) => {
@@ -82,14 +87,15 @@ export default class EditProductDelivery extends Component<Props, State> {
             deliveryLocationChoosed: deliveryLocations.find((item) => item.id === productDelivery.deliveryLocationId) || null,
             productChoosed: products.find((item) => item.id === productDelivery.productId) || null,
             quantityDelivered: productDelivery.quantityDelivered.toString(),
-            soldPrice: productDelivery.soldPrice.toString()
+            soldPrice: productDelivery.soldPrice.toString(),
+            observations: productDelivery.observations
         })
 
         if (productDelivery.expirationDate) {
-            this.setState({ expirationDate:  this.addOneDay(new Date(productDelivery.expirationDate))});
+            this.setState({ expirationDate: this.addOneDay(new Date(productDelivery.expirationDate)) });
         }
         if (productDelivery.deliveryDate) {
-            this.setState({ deliveryDate:  this.addOneDay(new Date(productDelivery.deliveryDate))});
+            this.setState({ deliveryDate: this.addOneDay(new Date(productDelivery.deliveryDate)) });
         }
     }
 
@@ -113,6 +119,9 @@ export default class EditProductDelivery extends Component<Props, State> {
             if (decimalRegex.test(value)) {
                 this.setState({ soldPrice: value })
             }
+        }
+        if (name === "observations") {
+            this.setState({ observations: value })
         }
     }
 
@@ -152,7 +161,7 @@ export default class EditProductDelivery extends Component<Props, State> {
 
         if (this.validations()) {
             try {
-                const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice , deliveryDate} = this.state
+                const { productDeliveryId, deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice, deliveryDate, observations } = this.state
                 let qReturnedValue: number | null
                 if (quantityReturned === "") {
                     qReturnedValue = null
@@ -176,6 +185,7 @@ export default class EditProductDelivery extends Component<Props, State> {
                     quantityReturned: qReturnedValue,
                     soldPrice: +soldPrice,
                     deliveryDate: deliveryDate ? formatDate(deliveryDate) : '',
+                    observations: observations
                 }
 
                 const response = await ProductDeliveryService.updateProductDelivery(productDeliveryId, productDeliveryToEdit)
@@ -192,7 +202,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     }
 
     validations = () => {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice ,deliveryDate} = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, soldPrice, deliveryDate } = this.state
         if (deliveryLocationChoosed === null) {
             this.prepareMessage("Debes ingresar un Nombre de Ubicacion", true);
             return false
@@ -244,7 +254,7 @@ export default class EditProductDelivery extends Component<Props, State> {
     };
 
     render() {
-        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice, deliveryDate, message, productDeliveryEdited, openDeliveryLocations, openProducts, products, deliveryLocations } = this.state
+        const { deliveryLocationChoosed, productChoosed, expirationDate, quantityDelivered, quantityReturned, soldPrice, deliveryDate, message, productDeliveryEdited, openDeliveryLocations, openProducts, products, deliveryLocations, observations } = this.state
 
         if (productDeliveryEdited) {
             return (<Navigate to={"/entregaproducto"} replace />)
@@ -284,7 +294,6 @@ export default class EditProductDelivery extends Component<Props, State> {
                                 options={deliveryLocations}
                                 onChange={this.handleDeliveryLocationChange}
                                 value={deliveryLocationChoosed}
-                                // loading={loading}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -295,7 +304,6 @@ export default class EditProductDelivery extends Component<Props, State> {
                                             ...params.InputProps,
                                             endAdornment: (
                                                 <React.Fragment>
-                                                    {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
                                                     {params.InputProps.endAdornment}
                                                 </React.Fragment>
                                             ),
@@ -351,15 +359,17 @@ export default class EditProductDelivery extends Component<Props, State> {
 
                             <TextField id="soldPrice" variant="outlined" margin="normal" required fullWidth
                                 label="Precio Venta" name="soldPrice" value={soldPrice} onChange={this.handleOnChange} />
-                            
+
                             <LocalizationProvider dateAdapter={AdapterDateFns} >
                                 <DatePicker
                                     // @ts-expect-error
                                     id="deliveryDate" variant="outlined" margin="normal" required fullWidth
-                                    label="Fecha Entrega * (MM-DD-YYYY)" name="deliveryDate" value={deliveryDate} sx={{marginTop: "15px"}} onChange={this.handleDeliveryDateOnChange} />
+                                    label="Fecha Entrega * (MM-DD-YYYY)" name="deliveryDate" value={deliveryDate} sx={{ marginTop: "15px" }} onChange={this.handleDeliveryDateOnChange} />
                             </LocalizationProvider>
 
-
+                            <TextField id="observations" variant="outlined" margin="normal" fullWidth type="text"
+                                label="Observaciones" name="observations" value={observations} onChange={this.handleOnChange}
+                            />
                             <Button type="submit" variant="contained" sx={{ mt: 3, mb: 2, py: 1, bgcolor: "#002366", width: 150, alignSelf: "end" }}>Editar</Button>
                         </Box>
                     </Container>

@@ -16,17 +16,20 @@ export default class Logs extends Component<Props, State> {
 
     state: State = {
         columnHeaders: [{ field: "id", headerName: "Código", headerAlign: "center", align: "center", width: 250, type: "string" },
-        { field: "description", headerName: "Descripción", headerAlign: "center", align: "center", width: 600, type: "string" },
-        { field: "date", headerName: "Fecha", headerAlign: "center", align: "center", width: 250, type: "string" },
+        { field: "description", headerName: "Descripción", headerAlign: "center", align: "center", width: 400, type: "string" },
+        { field: "user", headerName: "Usuario", headerAlign: "center", align: "center", width: 200, type: "string" },
+        { field: "date", headerName: "Fecha", headerAlign: "center", align: "center", width: 250, type: "string" },        
         ],
         logs: [],
     }
+
     async componentDidMount() {
         const logs = (await LogsService.getLogs()).data
         this.setState({
             logs
         })
     }
+    
     render() {
         const { columnHeaders, logs } = this.state
 
